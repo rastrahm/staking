@@ -1,0 +1,35 @@
+# Next.js & React Expert Rules (App Router)
+
+## 1. Concepto de Desarrollo Explícito
+- **Data Flow**: Prohibido el uso de "prop drilling" confuso o estados globales mágicos. Define interfaces de TypeScript claras para cada Prop y cada retorno de API.
+- **Server vs Client**: Declara explícitamente `'use client'` o `'use server'` en la parte superior de cada archivo. No mezcles lógica de servidor en componentes de cliente.
+- **Validación de Datos**: Usa **Zod** de forma explícita para validar las entradas de formularios, parámetros de URL (`params`, `searchParams`) y respuestas de Fetch/Server Actions.
+- **Tipado Estricto**: Cero uso de `any`. Cada función, hook y componente debe tener tipos de TypeScript definidos y exportados si es necesario.
+
+## 2. Documentación Obligatoria por Función
+Cada componente, Server Action, Hook o utilidad debe incluir un bloque JSDoc:
+- **Descripción**: Propósito funcional del código (qué resuelve para el usuario).
+- **Entradas (@param)**: Nombre y descripción de cada prop o argumento.
+- **Salidas/Retornos (@return / @component)**: Qué renderiza el componente o qué dato/error devuelve la función.
+
+## 3. Estrategia TDD (Test-Driven Development)
+- **Tests de Interacción**: Antes de codear el componente, escribe el test con **Vitest + React Testing Library**.
+- **User-Centric Testing**: Los tests deben buscar elementos por su rol (aria-label, placeholder) para asegurar la accesibilidad, no por clases CSS.
+- **Server Action Testing**: Crea tests unitarios para la lógica de negocio dentro de las Server Actions de forma independiente a la UI.
+
+## 4. Estándares de Arquitectura Next.js
+- **Componentes Pequeños**: Si un componente excede las 60 líneas, evalúa extraer sub-componentes de forma explícita.
+- **Optimización de Imágenes**: Usa siempre el componente `<Image />` de Next.js con `alt` descriptivo y dimensiones explícitas.
+- **Manejo de Errores**: Implementa archivos `error.tsx` y `not-found.tsx` explícitos por cada ruta principal.
+
+## 5. Formato de Comentarios Requerido (Ejemplo)
+```typescript
+/**
+ * @description Componente de servidor para mostrar el perfil del usuario.
+ * @param {string} userId - Identificador único del usuario obtenido de la sesión.
+ * @returns {JSX.Element} Renderiza la tarjeta de perfil o un estado de carga.
+ */
+export default async function UserProfile({ userId }: { userId: string }) {
+  const user = await fetchUserData(userId); // Lógica explícita de servidor
+  return <section>{/* ... */}</section>;
+}

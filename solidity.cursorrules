@@ -1,0 +1,23 @@
+# Solidity Rules (Foundry + OpenZeppelin)
+## General Principles
+- **Architecture**: Design patterns (Proxy, Factory, etc.) must be explained before coding.
+- **Security**: Check-Effects-Interactions pattern is mandatory. Use OZ `ReentrancyGuard`.
+- **TDD**: Foundry is the source of truth. Write Solidity tests first.
+
+## Standards
+- NatSpec documentation for all functions.
+- Gas Optimization: Use `unchecked` (only if proven safe), optimized storage layouts, and `external` vs `public`.
+- No Floating Pragma: Use a fixed version (e.g., `0.8.20`).
+
+# Solidity Rules
+- **Security Audit**: Always follow the Check-Effects-Interactions pattern.
+- **Inheritance**: Only use OpenZeppelin audited contracts.
+- **Foundry**: Tests must have 100% branch coverage. Use `vm.expectRevert()` for failure cases.
+- **Gas**: Use `immutable` and `constant` where possible. Explain gas tradeoffs in every optimization.
+- **Explicit Development**: Use the Check-Effects-Interactions pattern explicitly. No hidden state changes. State clearly if a function is `view`, `pure`, or `payable`.
+- **Function Documentation**: Use **NatSpec** mandatory:
+  - `@notice`: What it does for the user.
+  - `@dev`: Technical details for developers.
+  - `@param`: Input descriptions.
+  - `@return`: Output descriptions.
+- **TDD & Security**: Tests must cover 100% of the explicit logic paths.
