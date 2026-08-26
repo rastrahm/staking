@@ -126,6 +126,8 @@ contract StakingRewards is IStakingRewards, Ownable2Step, ReentrancyGuard {
 
         _totalSupply += amount;
         _balances[msg.sender] += amount;
+        // Política v1: cada stake (o restake) reinicia el reloj de unlock a now + lockupDuration.
+        // `setLockupDuration` solo afecta stakes futuros; no reescribe unlockTime existentes.
         unlockTime[msg.sender] = block.timestamp + lockupDuration;
 
         STAKING_TOKEN.safeTransferFrom(msg.sender, address(this), amount);

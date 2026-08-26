@@ -150,7 +150,7 @@ balanceOf(rewardsToken, vault) >= rewards pendientes + residual no asignado
 | 0 | Bootstrap Foundry + docs | ✅ Aprobada (2026-08-26) |
 | 1 | Diseño on-chain: interfaces, errores, modelo math + tests rojos | ✅ Aprobada (2026-08-26) |
 | 2 | Implementación core O(1) + unit tests (`vm.warp`) | ✅ Aprobada (2026-08-26) |
-| 3 | Lockup dinámico + `notifyRewardAmount` / duración | 🔒 Pendiente de autorización |
+| 3 | Lockup dinámico + `notifyRewardAmount` / duración | ✅ Aprobada (2026-08-26) |
 | 4 | Fuzz + invariantes + ataques / gas report | 🔒 Pendiente de autorización |
 | 5 | Scripts deploy + ABI | 🔒 Pendiente de autorización |
 | 6 | Frontend demo (opcional) | 🔒 Pendiente de autorización |
@@ -293,7 +293,7 @@ Implementar accumulator + `updateReward` + stake / withdraw / getReward con CEI 
 
 ### Fase 3 — Lockup dinámico + funding de rewards
 
-**Estado:** 🔒 Pendiente de autorización  
+**Estado:** ✅ Aprobada — 2026-08-26  
 **Duración estimada:** 1 día  
 **Depende de:** Fase 2 ✅
 
@@ -311,16 +311,24 @@ Periodos de reward (`notifyRewardAmount`, `setRewardsDuration`) y lockups dinám
 
 #### Criterios de aceptación
 
-- [ ] No se puede acortar/cambiar duration con periodo activo.
-- [ ] Unstake bloqueado hasta unlock.
-- [ ] Funding no rompe contabilidad de rewards ya earned.
+- [x] No se puede acortar/cambiar duration con periodo activo.
+- [x] Unstake bloqueado hasta unlock.
+- [x] Funding no rompe contabilidad de rewards ya earned.
+
+#### Resultado
+
+- Política documentada: cada stake reinicia `unlockTime = now + lockupDuration`; `setLockupDuration` no toca unlocks existentes.
+- `getReward` permitido durante lockup; `withdraw`/`exit` bloqueados hasta `unlockTime` (inclusive exacto OK).
+- `setRewardsDuration`: revert con `timestamp <= periodFinish`; OK en `finish + 1`.
+- Notify mid-period: leftover + earned previo intacto; nuevo periodo tras finish con rate fresco.
+- Suite: `test/unit/StakingRewards.phase3.t.sol` — **10 tests**; total repo **26 verdes**.
 
 #### Aprobación
 
-- [ ] Autorizada para ejecutar  
-- [ ] Completada y revisada → ✅ + fecha
+- [x] Autorizada para ejecutar  
+- [x] Completada y revisada → ✅ 2026-08-26
 
-> **No iniciar Fase 3 sin:** `Autorizo Fase 3`
+> Responde cuando quieras iniciar la **Fase 4**: `Autorizo Fase 4`
 
 ---
 
@@ -458,7 +466,7 @@ Alinear diagramas con código final; README usable por un tercero.
 [x] Fase 0  Bootstrap Foundry          → ✅ 2026-08-26
 [x] Fase 1  Diseño + TDD               → ✅ 2026-08-26
 [x] Fase 2  Core O(1) + unit           → ✅ 2026-08-26
-[ ] Fase 3  Lockup + notify            → requiere: Autorizo Fase 3
+[x] Fase 3  Lockup + notify            → ✅ 2026-08-26
 [ ] Fase 4  Fuzz / invariant / gas     → requiere: Autorizo Fase 4
 [ ] Fase 5  Deploy + ABI               → requiere: Autorizo Fase 5
 [ ] Fase 6  Frontend (opcional)        → requiere: Autorizo Fase 6 | Omitir
@@ -497,7 +505,7 @@ Alinear diagramas con código final; README usable por un tercero.
 
 ## 10. Próximo paso inmediato
 
-**Estado actual:** Fases **0–2** cerradas (core O(1) verde).  
-**Siguiente acción:** autorizar **Fase 3** (bordes de lockup + notify mid-period + duration).
+**Estado actual:** Fases **0–3** cerradas (core + lockup/notify bordes).  
+**Siguiente acción:** autorizar **Fase 4** (fuzz, invariantes, reentrancy, gas report).
 
-Responde: **`Autorizo Fase 3`** para continuar.
+Responde: **`Autorizo Fase 4`** para continuar.
