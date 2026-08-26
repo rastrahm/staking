@@ -148,7 +148,7 @@ balanceOf(rewardsToken, vault) >= rewards pendientes + residual no asignado
 | Fase | Nombre | Estado |
 |------|--------|--------|
 | 0 | Bootstrap Foundry + docs | ✅ Aprobada (2026-08-26) |
-| 1 | Diseño on-chain: interfaces, errores, modelo math + tests rojos | 🔒 Pendiente de autorización |
+| 1 | Diseño on-chain: interfaces, errores, modelo math + tests rojos | ✅ Aprobada (2026-08-26) |
 | 2 | Implementación core O(1) + unit tests (`vm.warp`) | 🔒 Pendiente de autorización |
 | 3 | Lockup dinámico + `notifyRewardAmount` / duración | 🔒 Pendiente de autorización |
 | 4 | Fuzz + invariantes + ataques / gas report | 🔒 Pendiente de autorización |
@@ -203,7 +203,7 @@ Inicializar Foundry, pinnear OZ v5, fijar `0.8.24`, dejar layout listo.
 
 ### Fase 1 — Diseño on-chain + TDD (tests primero)
 
-**Estado:** 🔒 Pendiente de autorización  
+**Estado:** ✅ Aprobada — 2026-08-26  
 **Duración estimada:** 1 día  
 **Depende de:** Fase 0 ✅
 
@@ -224,17 +224,27 @@ Congelar interfaz, errores, eventos y fórmulas; escribir tests que fallen / esq
 
 #### Criterios de aceptación
 
-- [ ] Interfaces compilables.
-- [ ] Solo custom errors (sin `require` strings).
-- [ ] Tests unitarios escritos para lifecycle Stake → warp → Claim → Unstake (pueden fallar hasta Fase 2).
-- [ ] Fórmulas escritas en NatSpec / este doc.
+- [x] Interfaces compilables.
+- [x] Solo custom errors (sin `require` strings).
+- [x] Tests unitarios escritos para lifecycle Stake → warp → Claim → Unstake (rojos hasta Fase 2).
+- [x] Fórmulas escritas en NatSpec / `doc/04-modelo-matematico.md`.
+
+#### Resultado
+
+- `src/interfaces/IStakingRewards.sol` — events, errors, views, mutators, NatSpec + fórmulas.
+- `src/StakingRewards.sol` — esqueleto Ownable2Step + ReentrancyGuard; views math; mutators → `NotImplemented`.
+- `src/mocks/MockERC20.sol` — mint para tests.
+- `test/StakingRewards.t.sol` — 7 tests verdes (constructor, views, NotImplemented).
+- `test/unit/StakingRewards.lifecycle.t.sol` — 2 tests **rojos** TDD (lifecycle + prorrateo 2 stakers).
+- `doc/04-modelo-matematico.md` — PRECISION `1e18`, invariante, decisiones v1.
+- Decisiones: same token OK; sin Pausable; `exit()` sí; sin fee-on-transfer; notify con tokens ya en vault.
 
 #### Aprobación
 
-- [ ] Autorizada para ejecutar  
-- [ ] Completada y revisada → ✅ + fecha
+- [x] Autorizada para ejecutar  
+- [x] Completada y revisada → ✅ 2026-08-26
 
-> **No iniciar Fase 1 sin:** Fase 0 aprobada + `Autorizo Fase 1`
+> Responde cuando quieras iniciar la **Fase 2**: `Autorizo Fase 2`
 
 ---
 
@@ -438,7 +448,7 @@ Alinear diagramas con código final; README usable por un tercero.
 
 ```text
 [x] Fase 0  Bootstrap Foundry          → ✅ 2026-08-26
-[ ] Fase 1  Diseño + TDD               → requiere: Autorizo Fase 1
+[x] Fase 1  Diseño + TDD               → ✅ 2026-08-26
 [ ] Fase 2  Core O(1) + unit           → requiere: Autorizo Fase 2
 [ ] Fase 3  Lockup + notify            → requiere: Autorizo Fase 3
 [ ] Fase 4  Fuzz / invariant / gas     → requiere: Autorizo Fase 4
@@ -479,7 +489,7 @@ Alinear diagramas con código final; README usable por un tercero.
 
 ## 10. Próximo paso inmediato
 
-**Estado actual:** Fase **0** cerrada (Foundry + OZ + placeholder).  
-**Siguiente acción:** autorizar **Fase 1** (interfaces, errores, fórmulas, tests TDD).
+**Estado actual:** Fases **0–1** cerradas (bootstrap + interfaz/TDD rojo).  
+**Siguiente acción:** autorizar **Fase 2** (core O(1): `updateReward`, stake/withdraw/getReward, poner lifecycle en verde).
 
-Responde: **`Autorizo Fase 1`** para continuar.
+Responde: **`Autorizo Fase 2`** para continuar.

@@ -2,7 +2,7 @@
 
 Protocolo de staking con distribución proporcional de rewards en O(1) (estilo Synthetix), usando Foundry y Solidity `0.8.24`.
 
-**Estado:** Fase 0 ✅ (bootstrap). Siguiente: Fase 1 (requiere autorización).
+**Estado:** Fases 0–1 ✅. Siguiente: Fase 2 (requiere autorización).
 
 ---
 
@@ -24,7 +24,7 @@ Protocolo de staking con distribución proporcional de rewards en O(1) (estilo S
 | [`doc/00-plan-implementacion.md`](doc/00-plan-implementacion.md) | Plan por fases (requiere autorización) |
 | [`doc/01-diagrama-clases.md`](doc/01-diagrama-clases.md) | Diagrama de clases |
 | [`doc/02-diagrama-flujo.md`](doc/02-diagrama-flujo.md) | Secuencias |
-| [`doc/03-flujograma.md`](doc/03-flujograma.md) | Flujogramas de decisión |
+| [`doc/04-modelo-matematico.md`](doc/04-modelo-matematico.md) | Fórmulas e invariante |
 
 ---
 
