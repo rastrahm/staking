@@ -8,6 +8,7 @@
 | [03-flujograma.md](./03-flujograma.md) | Flujograma de decisiones (sí/no) por operación |
 | [04-modelo-matematico.md](./04-modelo-matematico.md) | Fórmulas, PRECISION, invariante, decisiones v1 |
 | [GAS.md](./GAS.md) | Baseline de gas y tradeoffs (Fase 4) |
+| [DEPLOY.md](./DEPLOY.md) | Playbook Anvil / testnet + export ABI |
 | [SWC-AUDIT.md](./SWC-AUDIT.md) | Auditoría SWC-100–136 + principios suite |
 | [ATAQUES.md](./ATAQUES.md) | Campañas de ataque defensivas A–E |
 

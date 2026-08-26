@@ -152,7 +152,7 @@ balanceOf(rewardsToken, vault) >= rewards pendientes + residual no asignado
 | 2 | Implementación core O(1) + unit tests (`vm.warp`) | ✅ Aprobada (2026-08-26) |
 | 3 | Lockup dinámico + `notifyRewardAmount` / duración | ✅ Aprobada (2026-08-26) |
 | 4 | Fuzz + invariantes + ataques / gas report | ✅ Aprobada (2026-08-26) |
-| 5 | Scripts deploy + ABI | 🔒 Pendiente de autorización |
+| 5 | Scripts deploy + ABI | ✅ Aprobada (2026-08-26) |
 | 6 | Frontend demo (opcional) | 🔒 Pendiente de autorización |
 | 7 | Docs finales, handoff, alineación diagramas | 🔒 Pendiente de autorización |
 
@@ -376,7 +376,7 @@ Endurecer propiedades matemáticas y de seguridad.
 
 ### Fase 5 — Deploy scripts + ABI
 
-**Estado:** 🔒 Pendiente de autorización  
+**Estado:** ✅ Aprobada — 2026-08-26  
 **Duración estimada:** 0.5 día  
 **Depende de:** Fase 4 ✅
 
@@ -393,15 +393,22 @@ Deploy reproducible en Anvil/testnet y export de ABI para UI.
 
 #### Criterios de aceptación
 
-- [ ] Deploy script verde en Anvil.
-- [ ] Addresses + ABI documentados.
+- [x] Deploy script verde en Anvil.
+- [x] Addresses + ABI documentados.
+
+#### Resultado
+
+- `script/Deploy.s.sol` — mocks opcionales, `SAME_TOKEN`, mint, `notify` inicial.
+- `script/export-abi.sh` → `doc/abi/` + `frontend/abi/` (`StakingRewards`, `IStakingRewards`, `MockERC20`).
+- `doc/DEPLOY.md` — playbook Anvil / testnet.
+- Verificado en Anvil chain 31337: deploy + `notify` OK; `cast call rewardRate/periodFinish`.
 
 #### Aprobación
 
-- [ ] Autorizada para ejecutar  
-- [ ] Completada y revisada → ✅ + fecha
+- [x] Autorizada para ejecutar  
+- [x] Completada y revisada → ✅ 2026-08-26
 
-> **No iniciar Fase 5 sin:** `Autorizo Fase 5`
+> Responde: **`Autorizo Fase 6`** (frontend) o **`Omitir Fase 6`** para ir a Fase 7.
 
 ---
 
@@ -477,7 +484,7 @@ Alinear diagramas con código final; README usable por un tercero.
 [x] Fase 2  Core O(1) + unit           → ✅ 2026-08-26
 [x] Fase 3  Lockup + notify            → ✅ 2026-08-26
 [x] Fase 4  Fuzz / invariant / gas     → ✅ 2026-08-26
-[ ] Fase 5  Deploy + ABI               → requiere: Autorizo Fase 5
+[x] Fase 5  Deploy + ABI               → ✅ 2026-08-26
 [ ] Fase 6  Frontend (opcional)        → requiere: Autorizo Fase 6 | Omitir
 [ ] Fase 7  Docs finales               → requiere: Autorizo Fase 7
 ```
@@ -514,7 +521,7 @@ Alinear diagramas con código final; README usable por un tercero.
 
 ## 10. Próximo paso inmediato
 
-**Estado actual:** Fases **0–4** cerradas (core + bordes + fuzz/invariant/reentrancy/gas).  
-**Siguiente acción:** autorizar **Fase 5** (deploy scripts + ABI).
+**Estado actual:** Fases **0–5** cerradas (incluye deploy Anvil + ABI).  
+**Siguiente:** **Fase 6** (frontend opcional) o **Fase 7** (docs finales).
 
-Responde: **`Autorizo Fase 5`** para continuar.
+Responde: **`Autorizo Fase 6`** | **`Omitir Fase 6`** | **`Autorizo Fase 7`**.
