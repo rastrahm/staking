@@ -14,6 +14,7 @@ Congelado en Fase 1. La implementación (Fase 2+) debe respetar estas definicion
 | `exit()` | **Sí** (`withdraw` total + `getReward`) |
 | Fee-on-transfer / rebase | **No soportado** — solo ERC-20 honestos |
 | `notifyRewardAmount` | Tokens de reward **ya transferidos** al contrato; la fn solo actualiza rate/periodo |
+| Lockup | Cada stake reinicia `unlockTime = now + lockupDuration`. `setLockupDuration` no toca unlocks existentes. Claim OK en lockup; withdraw/exit no. |
 
 ---
 
