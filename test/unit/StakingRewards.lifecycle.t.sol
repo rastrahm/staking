@@ -9,8 +9,7 @@ import {MockERC20} from "../../src/mocks/MockERC20.sol";
 
 /**
  * @title StakingRewardsLifecycleTest
- * @notice TDD Fase 1: lifecycle Stake → warp → Claim → Unstake (comportamiento final esperado).
- * @dev ROJO hasta Fase 2/3: falla en `notifyRewardAmount` / `stake` (`NotImplemented`).
+ * @notice Lifecycle Stake → warp → Claim → Unstake y prorrateo entre 2 stakers (Fase 2).
  */
 contract StakingRewardsLifecycleTest is Test {
     uint256 internal constant DURATION = 100;
@@ -34,7 +33,6 @@ contract StakingRewardsLifecycleTest is Test {
         );
     }
 
-    /// @notice Lifecycle completo esperado tras Fase 2 (hoy rojo en notify/stake).
     function test_lifecycle_stake_warp_claim_unstake() public {
         stakeToken.mint(alice, STAKE_AMOUNT);
         rewardToken.mint(owner, REWARD_POT);
@@ -54,7 +52,6 @@ contract StakingRewardsLifecycleTest is Test {
 
         vm.warp(block.timestamp + 50);
 
-        // rate = 1000e18 / 100 = 10e18 / s → 50s → 500e18
         assertEq(staking.earned(alice), 500 ether, "earned after 50s");
 
         uint256 rewardBefore = rewardToken.balanceOf(alice);
@@ -70,7 +67,6 @@ contract StakingRewardsLifecycleTest is Test {
         assertEq(staking.totalSupply(), 0);
     }
 
-    /// @notice Dos stakers: prorrateo 2/3 y 1/3 (Alice 100, Bob 50, pot 150).
     function test_lifecycle_twoStakers_proportionalSplit() public {
         uint256 pot = 150 ether;
         stakeToken.mint(alice, 100 ether);
