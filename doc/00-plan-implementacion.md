@@ -149,7 +149,7 @@ balanceOf(rewardsToken, vault) >= rewards pendientes + residual no asignado
 |------|--------|--------|
 | 0 | Bootstrap Foundry + docs | ✅ Aprobada (2026-08-26) |
 | 1 | Diseño on-chain: interfaces, errores, modelo math + tests rojos | ✅ Aprobada (2026-08-26) |
-| 2 | Implementación core O(1) + unit tests (`vm.warp`) | 🔒 Pendiente de autorización |
+| 2 | Implementación core O(1) + unit tests (`vm.warp`) | ✅ Aprobada (2026-08-26) |
 | 3 | Lockup dinámico + `notifyRewardAmount` / duración | 🔒 Pendiente de autorización |
 | 4 | Fuzz + invariantes + ataques / gas report | 🔒 Pendiente de autorización |
 | 5 | Scripts deploy + ABI | 🔒 Pendiente de autorización |
@@ -250,7 +250,7 @@ Congelar interfaz, errores, eventos y fórmulas; escribir tests que fallen / esq
 
 ### Fase 2 — Implementación core O(1) + unit tests
 
-**Estado:** 🔒 Pendiente de autorización  
+**Estado:** ✅ Aprobada — 2026-08-26  
 **Duración estimada:** 1–2 días  
 **Depende de:** Fase 1 ✅
 
@@ -269,17 +269,25 @@ Implementar accumulator + `updateReward` + stake / withdraw / getReward con CEI 
 
 #### Criterios de aceptación
 
-- [ ] Cero loops sobre arrays de usuarios.
-- [ ] Lifecycle unitario verde.
-- [ ] Rewards proporcionales a stake × tiempo (casos con 1 y 2 stakers).
-- [ ] NatSpec en públicas/externas.
+- [x] Cero loops sobre arrays de usuarios.
+- [x] Lifecycle unitario verde.
+- [x] Rewards proporcionales a stake × tiempo (casos con 1 y 2 stakers).
+- [x] NatSpec en públicas/externas.
+
+#### Resultado
+
+- `StakingRewards.sol` completo: `updateReward`, stake/withdraw/getReward/exit, `notifyRewardAmount`, set durations.
+- SafeERC20 + ReentrancyGuard + CEI; `PRECISION = 1e18`.
+- Same-token: solvencia de notify descuenta `totalSupply` del balance.
+- Lockup básico: `unlockTime = now + lockupDuration` en stake; `LockupActive` en withdraw/exit (detalle/borde en Fase 3).
+- Suite: **16 tests verdes** (core + lifecycle).
 
 #### Aprobación
 
-- [ ] Autorizada para ejecutar  
-- [ ] Completada y revisada → ✅ + fecha
+- [x] Autorizada para ejecutar  
+- [x] Completada y revisada → ✅ 2026-08-26
 
-> **No iniciar Fase 2 sin:** `Autorizo Fase 2`
+> Responde cuando quieras iniciar la **Fase 3**: `Autorizo Fase 3`
 
 ---
 
@@ -449,7 +457,7 @@ Alinear diagramas con código final; README usable por un tercero.
 ```text
 [x] Fase 0  Bootstrap Foundry          → ✅ 2026-08-26
 [x] Fase 1  Diseño + TDD               → ✅ 2026-08-26
-[ ] Fase 2  Core O(1) + unit           → requiere: Autorizo Fase 2
+[x] Fase 2  Core O(1) + unit           → ✅ 2026-08-26
 [ ] Fase 3  Lockup + notify            → requiere: Autorizo Fase 3
 [ ] Fase 4  Fuzz / invariant / gas     → requiere: Autorizo Fase 4
 [ ] Fase 5  Deploy + ABI               → requiere: Autorizo Fase 5
@@ -489,7 +497,7 @@ Alinear diagramas con código final; README usable por un tercero.
 
 ## 10. Próximo paso inmediato
 
-**Estado actual:** Fases **0–1** cerradas (bootstrap + interfaz/TDD rojo).  
-**Siguiente acción:** autorizar **Fase 2** (core O(1): `updateReward`, stake/withdraw/getReward, poner lifecycle en verde).
+**Estado actual:** Fases **0–2** cerradas (core O(1) verde).  
+**Siguiente acción:** autorizar **Fase 3** (bordes de lockup + notify mid-period + duration).
 
-Responde: **`Autorizo Fase 2`** para continuar.
+Responde: **`Autorizo Fase 3`** para continuar.
