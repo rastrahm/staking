@@ -151,7 +151,7 @@ balanceOf(rewardsToken, vault) >= rewards pendientes + residual no asignado
 | 1 | Diseño on-chain: interfaces, errores, modelo math + tests rojos | ✅ Aprobada (2026-08-26) |
 | 2 | Implementación core O(1) + unit tests (`vm.warp`) | ✅ Aprobada (2026-08-26) |
 | 3 | Lockup dinámico + `notifyRewardAmount` / duración | ✅ Aprobada (2026-08-26) |
-| 4 | Fuzz + invariantes + ataques / gas report | 🔒 Pendiente de autorización |
+| 4 | Fuzz + invariantes + ataques / gas report | ✅ Aprobada (2026-08-26) |
 | 5 | Scripts deploy + ABI | 🔒 Pendiente de autorización |
 | 6 | Frontend demo (opcional) | 🔒 Pendiente de autorización |
 | 7 | Docs finales, handoff, alineación diagramas | 🔒 Pendiente de autorización |
@@ -334,7 +334,7 @@ Periodos de reward (`notifyRewardAmount`, `setRewardsDuration`) y lockups dinám
 
 ### Fase 4 — Fuzz, invariantes, ataques, gas
 
-**Estado:** 🔒 Pendiente de autorización  
+**Estado:** ✅ Aprobada — 2026-08-26  
 **Duración estimada:** 1–2 días  
 **Depende de:** Fase 3 ✅
 
@@ -352,16 +352,25 @@ Endurecer propiedades matemáticas y de seguridad.
 
 #### Criterios de aceptación
 
-- [ ] Fuzz ≥ 1000 runs sin rotura de invariante.
-- [ ] Reentrancy no drena.
-- [ ] Gas report baseline documentado (puede vivir en `doc/GAS.md` si se autoriza crear ese archivo).
+- [x] Fuzz ≥ 1000 runs sin rotura de invariante.
+- [x] Reentrancy no drena.
+- [x] Gas report baseline documentado (`doc/GAS.md`).
+
+#### Resultado
+
+- `test/fuzz/StakingRewards.fuzz.t.sol` — 5 fuzz × 1000 runs.
+- `test/invariant/` — handler + `StakeTokenExact` + `RewardSolvency` (256 runs / 3840 calls).
+- `test/attack/ReentrancyAttack.t.sol` — callback ERC-20 en getReward/withdraw → `ReentrancyGuardReentrantCall`, sin drenado.
+- `src/mocks/MockERC20Reentrant.sol`.
+- `doc/GAS.md` — baseline deploy ~1.15M gas; tradeoffs documentados.
+- Suite total: **35 tests** verdes (unit + fuzz + invariant + attack).
 
 #### Aprobación
 
-- [ ] Autorizada para ejecutar  
-- [ ] Completada y revisada → ✅ + fecha
+- [x] Autorizada para ejecutar  
+- [x] Completada y revisada → ✅ 2026-08-26
 
-> **No iniciar Fase 4 sin:** `Autorizo Fase 4`
+> Responde cuando quieras iniciar la **Fase 5**: `Autorizo Fase 5`
 
 ---
 
@@ -467,7 +476,7 @@ Alinear diagramas con código final; README usable por un tercero.
 [x] Fase 1  Diseño + TDD               → ✅ 2026-08-26
 [x] Fase 2  Core O(1) + unit           → ✅ 2026-08-26
 [x] Fase 3  Lockup + notify            → ✅ 2026-08-26
-[ ] Fase 4  Fuzz / invariant / gas     → requiere: Autorizo Fase 4
+[x] Fase 4  Fuzz / invariant / gas     → ✅ 2026-08-26
 [ ] Fase 5  Deploy + ABI               → requiere: Autorizo Fase 5
 [ ] Fase 6  Frontend (opcional)        → requiere: Autorizo Fase 6 | Omitir
 [ ] Fase 7  Docs finales               → requiere: Autorizo Fase 7
@@ -505,7 +514,7 @@ Alinear diagramas con código final; README usable por un tercero.
 
 ## 10. Próximo paso inmediato
 
-**Estado actual:** Fases **0–3** cerradas (core + lockup/notify bordes).  
-**Siguiente acción:** autorizar **Fase 4** (fuzz, invariantes, reentrancy, gas report).
+**Estado actual:** Fases **0–4** cerradas (core + bordes + fuzz/invariant/reentrancy/gas).  
+**Siguiente acción:** autorizar **Fase 5** (deploy scripts + ABI).
 
-Responde: **`Autorizo Fase 4`** para continuar.
+Responde: **`Autorizo Fase 5`** para continuar.
