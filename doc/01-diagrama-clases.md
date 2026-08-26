@@ -183,7 +183,7 @@ earned(user) =
   + balances[user] * (rewardPerToken - userRewardPerTokenPaid[user]) / PRECISION
 ```
 
-`PRECISION`: `1e18` o `1e36` (fijar en Fase 1).
+`PRECISION`: **`1e18`** (congelado Fase 1). Detalle completo: [`04-modelo-matematico.md`](./04-modelo-matematico.md).
 
 ---
 
@@ -201,9 +201,12 @@ earned(user) =
 
 ---
 
-## 5. Notas de diseño abiertas (resolver en Fase 1)
+## 5. Decisiones de diseño (Fase 1)
 
-- ¿`stakingToken == rewardsToken` permitido?
-- ¿Pausable en v1?
-- ¿`exit()` en interfaz mínima?
-- ¿Fee-on-transfer: revert documental o medición por delta?
+| Tema | Decisión |
+|------|----------|
+| `stakingToken == rewardsToken` | Permitido |
+| `Pausable` | No en v1 |
+| `exit()` | Sí |
+| Fee-on-transfer / rebase | No soportado (ERC-20 honestos) |
+| `notifyRewardAmount` | Tokens ya en el contrato; solo actualiza contabilidad |
