@@ -26,7 +26,7 @@ Verificación de `StakingRewards` contra el [SWC Registry](https://swcregistry.i
 | Principio | Estado |
 |-----------|--------|
 | CEI antes de transfers | ✅ `stake` / `withdraw` / `getReward` / `exit` |
-| `ReentrancyGuard` | ✅ + tests callback ERC-20 |
+| `ReentrancyGuardTransient` (EIP-1153) | ✅ + tests callback ERC-20 |
 | Sin loops sobre usuarios | ✅ O(1) accumulator |
 | SafeERC20 | ✅ |
 | Custom errors (no `require` strings) | ✅ |
@@ -46,7 +46,7 @@ Verificación de `StakingRewards` contra el [SWC Registry](https://swcregistry.i
 | SWC-104 | Unchecked Call Return Value | Sí | ✅ | `SafeERC20.safeTransfer` / `safeTransferFrom` |
 | SWC-105 | Unprotected Ether Withdrawal | No | N/A | Sin ETH / `payable` / `.call{value}` |
 | SWC-106 | Unprotected SELFDESTRUCT | No | N/A | Sin `selfdestruct` |
-| SWC-107 | Reentrancy | Sí | ✅ | CEI + `nonReentrant`; `test/attack/ReentrancyAttack.t.sol` |
+| SWC-107 | Reentrancy | Sí | ✅ | CEI + `ReentrancyGuardTransient`; `test/attack/ReentrancyAttack.t.sol` |
 | SWC-108 | State Variable Default Visibility | Sí | ✅ | Tokens/`_balances`/`_totalSupply` private; getters explícitos |
 | SWC-109 | Uninitialized Storage Pointer | No | N/A | Sin punteros storage legacy |
 | SWC-110 | Assert Violation | No | N/A | Sin `assert` de producción |
@@ -58,13 +58,13 @@ Verificación de `StakingRewards` contra el [SWC Registry](https://swcregistry.i
 | SWC-116 | Block values as a proxy for time | Sí | ⚠️ | `block.timestamp` para rate/lockup (uso Synthetix aceptado) |
 | SWC-117 | Signature Malleability | No | N/A | Sin firmas / `ecrecover` / permit |
 | SWC-118 | Incorrect Constructor Name | No | N/A | `constructor` 0.8+ |
-| SWC-119 | Shadowing State Variables | Sí | ✅ | Sin shadowing con OZ `Ownable2Step` / `ReentrancyGuard` |
+| SWC-119 | Shadowing State Variables | Sí | ✅ | Sin shadowing con OZ `Ownable2Step` / `ReentrancyGuardTransient` |
 | SWC-120 | Weak Sources of Randomness | No | N/A | Sin RNG |
 | SWC-121 | Missing Protection against Signature Replay | No | N/A | Sin firmas |
 | SWC-122 | Lack of Proper Signature Verification | No | N/A | Sin verificación de firmas |
 | SWC-123 | Requirement Violation | Sí | ✅ | Custom errors + unit/fuzz/invariant |
 | SWC-124 | Write to Arbitrary Storage Location | No | N/A | Sin assembly de storage |
-| SWC-125 | Incorrect Inheritance Order | Sí | ✅ | `IStakingRewards, Ownable2Step, ReentrancyGuard` |
+| SWC-125 | Incorrect Inheritance Order | Sí | ✅ | `IStakingRewards, Ownable2Step, ReentrancyGuardTransient` |
 | SWC-126 | Insufficient Gas Griefing | No | N/A | Sin relayers con stipend fijo |
 | SWC-127 | Arbitrary Jump with Function Type Variable | No | N/A | Sin function types dinámicos |
 | SWC-128 | DoS With Block Gas Limit | Sí | ✅ | Paths O(1); sin loops sobre stakers |
@@ -112,7 +112,7 @@ El pool no gestiona allowances. El usuario debe `approve(staking, amount)` en el
 |-----------|----------|--------|
 | Checks-Effects-Interactions | ✅ | Effects de balances/rewards antes de `safeTransfer*` |
 | Pull over Push | ✅ | Usuario llama `getReward` / `withdraw` (no push automático) |
-| ReentrancyGuard | ✅ | + CEI; ataque callback documentado |
+| ReentrancyGuardTransient | ✅ | + CEI; ataque callback documentado |
 | Access control admin | ✅ | `onlyOwner` en notify/set* |
 | Custom errors | ✅ | `ZeroAmount`, `InsufficientStake`, `LockupActive`, … |
 | O(1) gas / sin loops de usuarios | ✅ | Accumulator `rewardPerTokenStored` |

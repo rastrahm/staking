@@ -1,56 +1,64 @@
-# Optimización de gas — StakingRewards (Fase 4 baseline)
+# Optimización de gas — StakingRewards
 
-Baseline medido tras Fases 0–3 (sin micro-opts agresivas). Regenerar:
+Regenerar:
 
 ```bash
 export PATH="$HOME/.foundry/bin:$PATH"
 forge test --match-contract 'StakingRewardsCoreTest|StakingRewardsLifecycleTest|StakingRewardsPhase3Test' --gas-report
 ```
 
-> `gas-report.txt` está en `.gitignore` si se redirige a disco.
+---
+
+## Cambios aplicados (2026-08-26)
+
+| Optimización | Tradeoff | Efecto |
+|--------------|----------|--------|
+| `ReentrancyGuardTransient` (EIP-1153) | Cancun + OZ **v5.2.0** | Guard más barato en cada mutator |
+| Packing `uint64` ×4 (finish / lastUpdate / durations) | Caps `type(uint64).max` | Menos SLOAD/SSTORE en notify/stake |
+| Cache `rewardPerToken` en `updateReward` + `_earned` | Ninguno | Evita doble cálculo del acumulador |
+| Cache `account = msg.sender` | Ninguno | Menos `CALLER` |
+| `unchecked` tras checks de resta | Checks deben permanecer | Menos overflow checks |
+| OZ `v5.0.2` → `v5.2.0` | Pin alineado a módulo 02 | Habilita transient |
 
 ---
 
-## Baseline (2026-08-26)
+## Antes vs después (suite unit/lifecycle/phase3)
+
+| Métrica | Antes | Después | Δ |
+|---------|-------|---------|---|
+| Deployment Cost | 1 166 857 | 1 199 350 | **+32 493** (OZ 5.2 + getters explícitos) |
+| Deployment Size | 5424 | 5872 | +448 bytes |
+| `stake` avg | 127 790 | 120 432 | **−7 358** |
+| `withdraw` avg | 73 311 | 64 112 | **−9 199** |
+| `getReward` avg | 121 987 | 115 882 | **−6 105** |
+| `exit` avg | 100 053 | 91 439 | **−8 614** |
+| `notifyRewardAmount` avg | 92 169 | 60 050 | **−32 119** |
+
+**Lectura:** el deploy sube un poco (dependencia + ABI de getters); las rutas calientes de usuario/admin **bajan** de forma clara, sobre todo `notify` y `withdraw`.
+
+### Post-opt detalle
 
 | Función | Min | Avg | Median | Max |
 |---------|-----|-----|--------|-----|
-| Deployment `StakingRewards` | — | **1 146 921** | — | size 5424 |
-| `stake` | 42 944 | 127 790 | 136 622 | 136 634 |
-| `withdraw` | 46 599 | 73 311 | 49 056 | 136 298 |
-| `getReward` | 121 987 | 121 987 | 121 987 | 121 987 |
-| `exit` | 48 752 | 100 053 | 100 053 | 151 355 |
-| `notifyRewardAmount` | 23 819 | 92 169 | 104 071 | 104 380 |
-| `setRewardsDuration` | 25 860 | 27 878 | 25 865 | 31 910 |
-| `setLockupDuration` | 23 679 | 33 415 | 29 734 | 46 834 |
-| `earned` (view) | 18 339 | 18 371 | 18 339 | 18 435 |
-
-Valores tomados del `--gas-report` de la suite unit/lifecycle/phase3.
+| `stake` | 35 951 | 120 432 | 129 650 | 129 662 |
+| `withdraw` | 36 337 | 64 112 | 38 816 | 129 722 |
+| `getReward` | 115 882 | 115 882 | 115 882 | 115 882 |
+| `exit` | 38 509 | 91 439 | 91 439 | 144 370 |
+| `notifyRewardAmount` | 23 819 | 60 050 | 63 204 | 66 432 |
 
 ---
 
-## Tradeoffs aceptados (v1)
+## Tradeoffs aceptados
 
-| Decisión | Por qué | Coste |
-|----------|---------|--------|
-| `ReentrancyGuard` (storage, no transient) | Compatible y claro; Cancun transient queda como mejora opcional | Guard más caro que EIP-1153 |
-| `SafeERC20` | Tokens no estándar / return data | Extra gas vs `transfer` crudo |
-| `Ownable2Step` | Ownership más seguro | 2 txs para transferir owner |
-| `PRECISION = 1e18` | Suficiente; dust residual acotado | Menos margen que `1e36` en edge extrema |
-| Lockup en cada stake | UX predecible; reinicia reloj | SSTORE `unlockTime` por stake |
-| Sin `Pausable` | Menos superficie admin (Fase 1) | Sin kill-switch on-chain |
+| Decisión | Por qué |
+|----------|---------|
+| Cancun + transient | Alineado a `02-crypto-bank` |
+| `uint64` tiempos/durations | Suficiente on-chain; overflow → revert |
+| Deploy un poco más caro | Preferimos runtime de usuarios más barato |
+| SafeERC20 / Ownable2Step | Seguridad > gas residual |
 
 ---
 
-## Posibles opts futuras (no aplicadas)
+## Seguridad
 
-- `ReentrancyGuardTransient` (Cancun) — alinear con módulo 02.
-- Packing de `periodFinish` / `lastUpdateTime` / `rewardRate` si el layout lo permite.
-- `unchecked` en restas de balance tras checks `>=`.
-- Cachear `msg.sender` en paths multi-SLOAD.
-
----
-
-## Seguridad vs gas (Fase 4)
-
-Los tests de reentrancy confirman que `nonReentrant` hace revertir toda la tx en callback ERC-20 malicioso (`getReward` / `withdraw`). El coste del guard se acepta frente a drenado.
+`test/attack/ReentrancyAttack.t.sol` verde con transient: reentrada → `ReentrancyGuardReentrantCall`, sin drenado. Suite completa: **35 tests**.
