@@ -3,7 +3,7 @@ pragma solidity 0.8.24;
 
 import {Test} from "forge-std/Test.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+import {ReentrancyGuardTransient} from "@openzeppelin/contracts/utils/ReentrancyGuardTransient.sol";
 
 import {StakingRewards} from "../../src/StakingRewards.sol";
 import {MockERC20} from "../../src/mocks/MockERC20.sol";
@@ -47,7 +47,7 @@ contract ReentrancyAttackTest is Test {
         uint256 vaultRewardsBefore = rewardToken.balanceOf(address(staking));
 
         vm.prank(attackerEOA);
-        vm.expectRevert(ReentrancyGuard.ReentrancyGuardReentrantCall.selector);
+        vm.expectRevert(ReentrancyGuardTransient.ReentrancyGuardReentrantCall.selector);
         staking.getReward();
 
         // Estado intacto: no pagó, vault no drenado.
@@ -81,7 +81,7 @@ contract ReentrancyAttackTest is Test {
         );
 
         vm.prank(attackerEOA);
-        vm.expectRevert(ReentrancyGuard.ReentrancyGuardReentrantCall.selector);
+        vm.expectRevert(ReentrancyGuardTransient.ReentrancyGuardReentrantCall.selector);
         staking.withdraw(100 ether);
 
         assertEq(staking.balanceOf(attackerEOA), 100 ether);

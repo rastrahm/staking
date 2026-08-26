@@ -5,20 +5,21 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {Ownable2Step} from "@openzeppelin/contracts/access/Ownable2Step.sol";
-import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+import {ReentrancyGuardTransient} from "@openzeppelin/contracts/utils/ReentrancyGuardTransient.sol";
 
 import {IStakingRewards} from "./interfaces/IStakingRewards.sol";
 
 /**
  * @title StakingRewards
  * @notice Pool de staking con distribución de rewards O(1) estilo Synthetix.
- * @dev Accumulator `rewardPerTokenStored` + `updateReward`. CEI + SafeERC20 + ReentrancyGuard.
- *      `PRECISION = 1e18`. Sin loops sobre usuarios.
+ * @dev Accumulator + CEI + SafeERC20 + `ReentrancyGuardTransient` (EIP-1153, Cancun).
+ *      Gas: packing uint64 de tiempos/durations; cache `msg.sender`/`rewardPerToken`;
+ *      `unchecked` en restas tras checks.
  *
  * Stake y reward pueden ser el mismo token; en ese caso el check de solvencia de `notify`
  * descuenta `totalSupply` del balance del vault.
  */
-contract StakingRewards is IStakingRewards, Ownable2Step, ReentrancyGuard {
+contract StakingRewards is IStakingRewards, Ownable2Step, ReentrancyGuardTransient {
     using SafeERC20 for IERC20;
 
     /// @notice Escala interna del acumulador (fija en v1).
@@ -29,11 +30,13 @@ contract StakingRewards is IStakingRewards, Ownable2Step, ReentrancyGuard {
 
     uint256 public rewardPerTokenStored;
     uint256 public rewardRate;
-    uint256 public periodFinish;
-    uint256 public lastUpdateTime;
-    uint256 public rewardsDuration;
-    uint256 public lockupDuration;
     uint256 private _totalSupply;
+
+    // Un solo slot: timestamps + durations (uint64 basta hasta ~año 584e9).
+    uint64 private _periodFinish;
+    uint64 private _lastUpdateTime;
+    uint64 private _rewardsDuration;
+    uint64 private _lockupDuration;
 
     mapping(address account => uint256) private _balances;
     mapping(address account => uint256) public userRewardPerTokenPaid;
@@ -42,14 +45,16 @@ contract StakingRewards is IStakingRewards, Ownable2Step, ReentrancyGuard {
 
     /**
      * @notice Materializa el acumulador global y, si `account != 0`, la deuda del usuario.
+     * @dev Cachea `rewardPerToken()` una sola vez (evita doble SLOAD/cálculo en `earned`).
      * @param account Usuario a actualizar, o `address(0)` solo para el acumulador global.
      */
     modifier updateReward(address account) {
-        rewardPerTokenStored = rewardPerToken();
-        lastUpdateTime = lastTimeRewardApplicable();
+        uint256 rpt = rewardPerToken();
+        rewardPerTokenStored = rpt;
+        _lastUpdateTime = uint64(lastTimeRewardApplicable());
         if (account != address(0)) {
-            rewards[account] = earned(account);
-            userRewardPerTokenPaid[account] = rewardPerTokenStored;
+            rewards[account] = _earned(account, rpt);
+            userRewardPerTokenPaid[account] = rpt;
         }
         _;
     }
@@ -73,11 +78,12 @@ contract StakingRewards is IStakingRewards, Ownable2Step, ReentrancyGuard {
             revert ZeroAddress();
         }
         if (rewardsDuration_ == 0) revert ZeroAmount();
+        if (rewardsDuration_ > type(uint64).max || lockupDuration_ > type(uint64).max) revert ZeroAmount();
 
         STAKING_TOKEN = stakingToken_;
         REWARDS_TOKEN = rewardsToken_;
-        rewardsDuration = rewardsDuration_;
-        lockupDuration = lockupDuration_;
+        _rewardsDuration = uint64(rewardsDuration_);
+        _lockupDuration = uint64(lockupDuration_);
     }
 
     /// @inheritdoc IStakingRewards
@@ -101,52 +107,84 @@ contract StakingRewards is IStakingRewards, Ownable2Step, ReentrancyGuard {
     }
 
     /// @inheritdoc IStakingRewards
+    function periodFinish() external view returns (uint256) {
+        return _periodFinish;
+    }
+
+    /// @inheritdoc IStakingRewards
+    function rewardsDuration() external view returns (uint256) {
+        return _rewardsDuration;
+    }
+
+    /// @inheritdoc IStakingRewards
+    function lockupDuration() external view returns (uint256) {
+        return _lockupDuration;
+    }
+
+    /// @notice Último timestamp en que se materializó el acumulador global.
+    function lastUpdateTime() external view returns (uint256) {
+        return _lastUpdateTime;
+    }
+
+    /// @inheritdoc IStakingRewards
     function lastTimeRewardApplicable() public view returns (uint256) {
-        return block.timestamp < periodFinish ? block.timestamp : periodFinish;
+        uint256 finish = _periodFinish;
+        return block.timestamp < finish ? block.timestamp : finish;
     }
 
     /// @inheritdoc IStakingRewards
     function rewardPerToken() public view returns (uint256) {
-        if (_totalSupply == 0) {
+        uint256 supply = _totalSupply;
+        if (supply == 0) {
             return rewardPerTokenStored;
         }
-        return rewardPerTokenStored
-            + ((lastTimeRewardApplicable() - lastUpdateTime) * rewardRate * PRECISION) / _totalSupply;
+        uint256 applicable = lastTimeRewardApplicable();
+        uint256 last = _lastUpdateTime;
+        if (applicable <= last) {
+            return rewardPerTokenStored;
+        }
+        unchecked {
+            return rewardPerTokenStored + ((applicable - last) * rewardRate * PRECISION) / supply;
+        }
     }
 
     /// @inheritdoc IStakingRewards
     function earned(address account) public view returns (uint256) {
-        return _balances[account] * (rewardPerToken() - userRewardPerTokenPaid[account]) / PRECISION
-            + rewards[account];
+        return _earned(account, rewardPerToken());
     }
 
     /// @inheritdoc IStakingRewards
     function stake(uint256 amount) external nonReentrant updateReward(msg.sender) {
         if (amount == 0) revert ZeroAmount();
 
+        address account = msg.sender;
         _totalSupply += amount;
-        _balances[msg.sender] += amount;
-        // Política v1: cada stake (o restake) reinicia el reloj de unlock a now + lockupDuration.
-        // `setLockupDuration` solo afecta stakes futuros; no reescribe unlockTime existentes.
-        unlockTime[msg.sender] = block.timestamp + lockupDuration;
+        _balances[account] += amount;
+        // Política v1: cada stake reinicia unlock a now + lockupDuration.
+        unlockTime[account] = block.timestamp + _lockupDuration;
 
-        STAKING_TOKEN.safeTransferFrom(msg.sender, address(this), amount);
+        STAKING_TOKEN.safeTransferFrom(account, address(this), amount);
 
-        emit Staked(msg.sender, amount);
+        emit Staked(account, amount);
     }
 
     /// @inheritdoc IStakingRewards
     function withdraw(uint256 amount) external nonReentrant updateReward(msg.sender) {
         if (amount == 0) revert ZeroAmount();
-        if (_balances[msg.sender] < amount) revert InsufficientStake();
-        if (block.timestamp < unlockTime[msg.sender]) revert LockupActive();
 
-        _totalSupply -= amount;
-        _balances[msg.sender] -= amount;
+        address account = msg.sender;
+        uint256 bal = _balances[account];
+        if (bal < amount) revert InsufficientStake();
+        if (block.timestamp < unlockTime[account]) revert LockupActive();
 
-        STAKING_TOKEN.safeTransfer(msg.sender, amount);
+        unchecked {
+            _totalSupply -= amount;
+            _balances[account] = bal - amount;
+        }
 
-        emit Withdrawn(msg.sender, amount);
+        STAKING_TOKEN.safeTransfer(account, amount);
+
+        emit Withdrawn(account, amount);
     }
 
     /// @inheritdoc IStakingRewards
@@ -156,60 +194,80 @@ contract StakingRewards is IStakingRewards, Ownable2Step, ReentrancyGuard {
 
     /// @inheritdoc IStakingRewards
     function exit() external nonReentrant updateReward(msg.sender) {
-        uint256 bal = _balances[msg.sender];
+        address account = msg.sender;
+        uint256 bal = _balances[account];
         if (bal > 0) {
-            if (block.timestamp < unlockTime[msg.sender]) revert LockupActive();
-            _totalSupply -= bal;
-            _balances[msg.sender] = 0;
-            STAKING_TOKEN.safeTransfer(msg.sender, bal);
-            emit Withdrawn(msg.sender, bal);
+            if (block.timestamp < unlockTime[account]) revert LockupActive();
+            unchecked {
+                _totalSupply -= bal;
+            }
+            _balances[account] = 0;
+            STAKING_TOKEN.safeTransfer(account, bal);
+            emit Withdrawn(account, bal);
         }
-        _payoutReward(msg.sender);
+        _payoutReward(account);
     }
 
     /// @inheritdoc IStakingRewards
     function notifyRewardAmount(uint256 reward) external onlyOwner updateReward(address(0)) {
         if (reward == 0) revert ZeroAmount();
 
-        if (block.timestamp >= periodFinish) {
-            rewardRate = reward / rewardsDuration;
+        uint256 duration = _rewardsDuration;
+        uint256 finish = _periodFinish;
+        uint256 timestamp = block.timestamp;
+
+        if (timestamp >= finish) {
+            rewardRate = reward / duration;
         } else {
-            uint256 remaining = periodFinish - block.timestamp;
-            uint256 leftover = remaining * rewardRate;
-            rewardRate = (reward + leftover) / rewardsDuration;
+            unchecked {
+                uint256 remaining = finish - timestamp;
+                uint256 leftover = remaining * rewardRate;
+                rewardRate = (reward + leftover) / duration;
+            }
         }
 
         uint256 balance = REWARDS_TOKEN.balanceOf(address(this));
         if (address(STAKING_TOKEN) == address(REWARDS_TOKEN)) {
-            // El balance incluye el stake; solo cuenta el excedente como rewards.
-            if (balance < _totalSupply) revert RewardRateTooHigh();
-            balance -= _totalSupply;
+            uint256 staked = _totalSupply;
+            if (balance < staked) revert RewardRateTooHigh();
+            unchecked {
+                balance -= staked;
+            }
         }
-        if (rewardRate > balance / rewardsDuration) revert RewardRateTooHigh();
+        if (rewardRate > balance / duration) revert RewardRateTooHigh();
 
-        lastUpdateTime = block.timestamp;
-        periodFinish = block.timestamp + rewardsDuration;
+        _lastUpdateTime = uint64(timestamp);
+        uint256 newFinish = timestamp + duration;
+        if (newFinish > type(uint64).max) revert ZeroAmount();
+        _periodFinish = uint64(newFinish);
 
         emit RewardAdded(reward);
     }
 
     /// @inheritdoc IStakingRewards
     function setRewardsDuration(uint256 duration) external onlyOwner {
-        if (block.timestamp <= periodFinish) revert RewardPeriodActive();
-        if (duration == 0) revert ZeroAmount();
-        rewardsDuration = duration;
+        if (block.timestamp <= _periodFinish) revert RewardPeriodActive();
+        if (duration == 0 || duration > type(uint64).max) revert ZeroAmount();
+        _rewardsDuration = uint64(duration);
         emit RewardsDurationUpdated(duration);
     }
 
     /// @inheritdoc IStakingRewards
     function setLockupDuration(uint256 duration) external onlyOwner {
-        lockupDuration = duration;
+        if (duration > type(uint64).max) revert ZeroAmount();
+        _lockupDuration = uint64(duration);
         emit LockupDurationUpdated(duration);
     }
 
     /**
+     * @dev `earned` con `rewardPerToken` ya materializado (evita recálculo).
+     */
+    function _earned(address account, uint256 rpt) private view returns (uint256) {
+        return _balances[account] * (rpt - userRewardPerTokenPaid[account]) / PRECISION + rewards[account];
+    }
+
+    /**
      * @dev Effects → Interactions: pone `rewards[account]` a 0 y transfiere.
-     * @param account Beneficiario (`msg.sender` en flujos públicos).
      */
     function _payoutReward(address account) private {
         uint256 reward = rewards[account];

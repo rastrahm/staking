@@ -10,7 +10,7 @@ Protocolo de staking con distribución proporcional de rewards en O(1) (estilo S
 
 | Capa | Tecnología |
 |------|------------|
-| Contratos | Solidity `0.8.24`, OpenZeppelin v5.0.2 |
+| Contratos | Solidity `0.8.24`, OpenZeppelin v5.2 |
 | Tooling | Foundry (`forge` / `cast` / `anvil`) |
 | Modelo | Accumulator `rewardPerTokenStored` (O(1)) |
 
