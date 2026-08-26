@@ -46,9 +46,9 @@ sequenceDiagram
     participant Chain as Blockchain time
     participant S as StakingRewards
 
-    Note over Chain,S: Nadie llama stake/withdraw; el acumulador es lazy
+    Note over Chain,S: Nadie llama stake/withdraw - el acumulador es lazy
     Chain->>Chain: block.timestamp avanza (vm.warp en tests)
-    Note over S: lastUpdateTime y rewardPerTokenStored<br/>se materializan en el próximo updateReward
+    Note over S: lastUpdateTime y rewardPerTokenStored se materializan en el proximo updateReward
     Note over S: earned(user) view proyecta reward sin escribir estado
 ```
 

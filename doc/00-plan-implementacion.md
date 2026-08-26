@@ -147,7 +147,7 @@ balanceOf(rewardsToken, vault) >= rewards pendientes + residual no asignado
 
 | Fase | Nombre | Estado |
 |------|--------|--------|
-| 0 | Bootstrap Foundry + docs | 🔒 Pendiente de autorización |
+| 0 | Bootstrap Foundry + docs | ✅ Aprobada (2026-08-26) |
 | 1 | Diseño on-chain: interfaces, errores, modelo math + tests rojos | 🔒 Pendiente de autorización |
 | 2 | Implementación core O(1) + unit tests (`vm.warp`) | 🔒 Pendiente de autorización |
 | 3 | Lockup dinámico + `notifyRewardAmount` / duración | 🔒 Pendiente de autorización |
@@ -160,7 +160,7 @@ balanceOf(rewardsToken, vault) >= rewards pendientes + residual no asignado
 
 ### Fase 0 — Bootstrap del módulo
 
-**Estado:** 🔒 Pendiente de autorización  
+**Estado:** ✅ Aprobada — 2026-08-26  
 **Duración estimada:** 0.5 día
 
 #### Objetivo
@@ -177,17 +177,27 @@ Inicializar Foundry, pinnear OZ v5, fijar `0.8.24`, dejar layout listo.
 
 #### Criterios de aceptación
 
-- [ ] Compila sin errores.
-- [ ] Pragma fijo `0.8.24`.
-- [ ] Dependencias OZ instaladas.
-- [ ] `doc/` presente y referenciado.
+- [x] Compila sin errores.
+- [x] Pragma fijo `0.8.24`.
+- [x] Dependencias OZ instaladas.
+- [x] `doc/` presente y referenciado.
+
+#### Resultado
+
+- Foundry `1.4.3-stable` con `forge init --no-git --force`.
+- `foundry.toml`: `solc = 0.8.24`, `evm_version = cancun`, fuzz `runs = 1000`, invariant configurado.
+- Dependencias: `forge-std` + `openzeppelin-contracts@v5.0.2` (submódulos).
+- Placeholder: `src/StakingRewards.sol`, `test/StakingRewards.t.sol`, `script/Deploy.s.sol`.
+- Layout: `src/interfaces/`, `src/mocks/`, `test/{unit,fuzz,invariant}/`, `doc/`, `.env.example`, `README.md`.
+- `forge build` OK; `forge test` → 1 passed (`test_moduleId`).
+- Nota: usar `export PATH="$HOME/.foundry/bin:$PATH"` (el `forge` de npm choca con Foundry).
 
 #### Aprobación
 
-- [ ] Autorizada para ejecutar  
-- [ ] Completada y revisada → marcar ✅ + fecha
+- [x] Autorizada para ejecutar  
+- [x] Completada y revisada → ✅ 2026-08-26
 
-> **No iniciar Fase 0 sin:** `Autorizo Fase 0`
+> Responde cuando quieras iniciar la **Fase 1**: `Autorizo Fase 1`
 
 ---
 
@@ -427,7 +437,7 @@ Alinear diagramas con código final; README usable por un tercero.
 ## 7. Checklist de avance
 
 ```text
-[ ] Fase 0  Bootstrap Foundry          → requiere: Autorizo Fase 0
+[x] Fase 0  Bootstrap Foundry          → ✅ 2026-08-26
 [ ] Fase 1  Diseño + TDD               → requiere: Autorizo Fase 1
 [ ] Fase 2  Core O(1) + unit           → requiere: Autorizo Fase 2
 [ ] Fase 3  Lockup + notify            → requiere: Autorizo Fase 3
@@ -469,7 +479,7 @@ Alinear diagramas con código final; README usable por un tercero.
 
 ## 10. Próximo paso inmediato
 
-**Estado actual:** solo documentación de planificación en `doc/`.  
-**Siguiente acción:** autorizar **Fase 0** para bootstrap Foundry.
+**Estado actual:** Fase **0** cerrada (Foundry + OZ + placeholder).  
+**Siguiente acción:** autorizar **Fase 1** (interfaces, errores, fórmulas, tests TDD).
 
-Responde: **`Autorizo Fase 0`** para comenzar, o indica cambios al plan/diagramas antes de codear.
+Responde: **`Autorizo Fase 1`** para continuar.
