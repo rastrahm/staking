@@ -68,14 +68,22 @@ Genera (en `doc/abi/` y `frontend/abi/`):
 - `IStakingRewards.json`
 - `MockERC20.json`
 
-## 3. Frontend env (Fase 6, si se autoriza)
+## 3. Frontend env (Fase 6)
+
+Ver playbook completo: [`FRONTEND.md`](./FRONTEND.md).
 
 ```bash
+cd frontend
+cp .env.example .env.local
+# Rellena addresses del log de Deploy
+
 NEXT_PUBLIC_RPC_URL=http://127.0.0.1:8545
 NEXT_PUBLIC_CHAIN_ID=31337
 NEXT_PUBLIC_STAKING_ADDRESS=0x...
 NEXT_PUBLIC_STAKE_TOKEN=0x...
 NEXT_PUBLIC_REWARD_TOKEN=0x...
+
+npm install && npm run dev
 ```
 
 ## 4. Testnet (opcional)

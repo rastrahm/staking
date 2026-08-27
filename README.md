@@ -2,7 +2,7 @@
 
 Protocolo de staking con distribución proporcional de rewards en O(1) (estilo Synthetix), usando Foundry y Solidity `0.8.24`.
 
-**Estado:** Fases 0–5 ✅. Siguiente: Fase 6 (UI, opcional) o Fase 7 (docs).
+**Estado:** Fases 0–6 ✅. Siguiente: Fase 7 (docs finales).
 
 ---
 
@@ -23,6 +23,7 @@ Protocolo de staking con distribución proporcional de rewards en O(1) (estilo S
 | [`doc/INDEX.md`](doc/INDEX.md) | Índice |
 | [`doc/00-plan-implementacion.md`](doc/00-plan-implementacion.md) | Plan por fases (requiere autorización) |
 | [`doc/DEPLOY.md`](doc/DEPLOY.md) | Deploy Anvil / testnet + ABI |
+| [`doc/FRONTEND.md`](doc/FRONTEND.md) | Demo Next.js (Fase 6) |
 | [`doc/01-diagrama-clases.md`](doc/01-diagrama-clases.md) | Diagrama de clases |
 | [`doc/02-diagrama-flujo.md`](doc/02-diagrama-flujo.md) | Secuencias |
 | [`doc/03-flujograma.md`](doc/03-flujograma.md) | Flujogramas de decisión |
@@ -49,9 +50,12 @@ forge script script/Deploy.s.sol:Deploy \
   --broadcast
 
 ./script/export-abi.sh
+
+# UI demo
+cd frontend && cp .env.example .env.local && npm install && npm run dev
 ```
 
-Playbook completo: [`doc/DEPLOY.md`](doc/DEPLOY.md).
+Playbooks: [`doc/DEPLOY.md`](doc/DEPLOY.md) · [`doc/FRONTEND.md`](doc/FRONTEND.md).
 
 ---
 
