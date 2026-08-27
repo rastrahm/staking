@@ -1,6 +1,6 @@
 # Diagrama de flujo — Staking & Reward Distribution
 
-Secuencias de interacción entre **usuario**, **wallet/frontend** y **StakingRewards**. Complementa el [flujograma de decisiones](./03-flujograma.md).
+Secuencias de interacción entre **usuario**, **wallet/frontend** y **StakingRewards** (código final v1). Complementa el [flujograma de decisiones](./03-flujograma.md). Handoff: [`HANDOFF.md`](./HANDOFF.md).
 
 ---
 
@@ -139,7 +139,7 @@ sequenceDiagram
     participant S as StakingRewards
     participant R as rewardsToken
 
-    O->>R: transfer rewards al contrato (o transferFrom en notify)
+    O->>R: transfer rewards al vault (antes de notify)
     O->>W: notifyRewardAmount(reward)
     W->>S: notifyRewardAmount(reward)
     Note over S: onlyOwner + updateReward(address(0))
@@ -148,9 +148,12 @@ sequenceDiagram
     else periodo terminado
         Note over S: rate = reward / rewardsDuration
     end
+    Note over S: Si same-token: balance efectivo = balance - totalSupply<br/>exiger rate <= balance_efectivo / duration<br/>sino RewardRateTooHigh
     Note over S: Effects: rewardRate, lastUpdateTime, periodFinish
     S-->>W: RewardAdded
 ```
+
+> **v1:** `notify` no hace `transferFrom`. Los tokens deben estar ya en el contrato.
 
 ---
 

@@ -1,34 +1,38 @@
 # .cursorrules — Module 03: Staking & Reward Distribution Protocol
 
 ## MODULE OVERVIEW
-Focus on building an O(1) gas-optimized staking mechanism with proportional reward distribution, dynamic lockup periods, and mathematical precision handling using Foundry and Solidity 0.8.24.
+O(1) staking + proportional rewards (Synthetix-style), dynamic lockup, Foundry + Solidity 0.8.24.
+**v1 cerrado (Fases 0–7).** Fuente de verdad: `src/StakingRewards.sol` + `doc/HANDOFF.md`.
 
 ---
 
 ## 1. TECHNICAL CONSTRAINTS & STACK
 
-- **Compiler Version:** Strictly `pragma solidity 0.8.24;` (no floating pragmas).
-- **Tooling:** Foundry (`forge` for testing, fuzzing, and gas profiling).
-- **Mathematical Model:** Synthetix-style reward distribution algorithm (`rewardPerTokenStored` accumulator) to calculate user rewards in constant time O(1).
-- **Token Handling:** Safe handling of ERC-20 staking and reward tokens via `SafeERC20` or explicit custom transfer checks.
+- **Compiler:** Strictly `pragma solidity 0.8.24;` (no floating pragmas).
+- **Tooling:** Foundry (`forge` / `cast` / `anvil`).
+- **Model:** Synthetix accumulator (`rewardPerTokenStored`) — O(1), no user loops.
+- **PRECISION:** Fixed **`1e18`** (v1).
+- **Tokens:** `SafeERC20`; stake y reward pueden ser el mismo token.
+- **OZ v5.2:** `Ownable2Step`, `ReentrancyGuardTransient` (EIP-1153 / Cancun), `SafeERC20`.
+- **Sin Pausable** en v1.
 
 ---
 
 ## 2. CODING & SECURITY RULES
 
-- **O(1) State Design:** Absolutely zero loops over user arrays. Calculate accrued rewards dynamically using `lastUpdateTime` and `rewardRate`.
-- **Precision Management:** Use a scaling factor (`1e18` or `1e36`) for internal reward rate math to prevent precision loss during division.
-- **Modifiers & Accounting:**
-  - `updateReward(address account)` modifier applied to `stake()`, `withdraw()`, and `getReward()` routines.
-  - Strict application of Checks-Effects-Interactions (CEI) before calling external token transfer operations.
-- **Custom Errors:** Use custom errors (`error ZeroAmount()`, `error RewardPeriodActive()`, `error InsufficientStake()`, `error TransferFailed()`) instead of verbose `require()` strings.
+- **O(1):** Zero loops over user arrays. Accrue via `lastUpdateTime` + `rewardRate`.
+- **Modifiers:** `updateReward(account)` on `stake` / `withdraw` / `getReward` / `exit` / `notifyRewardAmount` (account `0` en notify).
+- **CEI** before external transfers; `nonReentrant` on user mutators.
+- **Custom errors:** `ZeroAmount`, `RewardPeriodActive`, `InsufficientStake`, `TransferFailed` (reservado), `LockupActive`, `ZeroAddress`, `RewardRateTooHigh`.
+- **Packing:** `_periodFinish`, `_lastUpdateTime`, `_rewardsDuration`, `_lockupDuration` as `uint64` (one slot).
+- **Lockup:** each `stake` resets `unlockTime = now + lockupDuration`; claim OK during lockup; withdraw/exit not.
+- **notify:** tokens already in vault; if same token, solvency uses `balance - totalSupply`.
 
 ---
 
 ## 3. TESTING REQUIREMENTS
 
-- **Foundry Unit Tests:** Test staking lifecycle (Stake -> Accumulate Time -> Claim Reward -> Unstake).
-- **Time Manipulation:** Use `vm.warp()` and `vm.roll()` to simulate exact reward accrual across multiple block timestamps.
-- **Fuzzing & Invariant Tests:**
-  - Fuzz stake amounts and duration intervals across multiple simulated users.
-  - Enforce invariant: Total vault balance must always equal `totalStaked + unassignedRewards`.
+- **Unit:** Stake → warp → claim → unstake (`vm.warp` / `vm.roll`).
+- **Fuzz + invariant:** multi-user amounts/durations.
+- **Vault solvency:** `rewardsToken.balanceOf(vault) >= pendingClaimable`; stake balance `>= totalStaked` (donations → `>`; not strict `==`).
+- **Attack:** reentrancy callback on claim/withdraw → `ReentrancyGuardReentrantCall`.

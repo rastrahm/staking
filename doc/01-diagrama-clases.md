@@ -1,6 +1,6 @@
 # Diagrama de clases — Staking & Reward Distribution
 
-Vista estática de tipos, responsabilidades y relaciones. Alineado al plan v1 (Synthetix-style O(1)). Actualizar tras cada fase aprobada si el código diverge.
+Vista estática alineada al código final (Fases 0–7, 2026-08-27). Synthetix-style O(1).
 
 ---
 
@@ -21,6 +21,7 @@ classDiagram
         +earned(account) uint256
         +rewardRate() uint256
         +periodFinish() uint256
+        +rewardsDuration() uint256
         +lockupDuration() uint256
         +unlockTime(account) uint256
         +stake(amount)
@@ -33,24 +34,24 @@ classDiagram
     }
 
     class StakingRewards {
-        -IERC20 _stakingToken
-        -IERC20 _rewardsToken
+        +uint256 PRECISION
+        -IERC20 STAKING_TOKEN
+        -IERC20 REWARDS_TOKEN
         -uint256 rewardPerTokenStored
         -uint256 rewardRate
-        -uint256 periodFinish
-        -uint256 lastUpdateTime
-        -uint256 rewardsDuration
-        -uint256 lockupDuration
-        -uint256 totalSupply
-        -mapping balances
+        -uint256 _totalSupply
+        -uint64 _periodFinish
+        -uint64 _lastUpdateTime
+        -uint64 _rewardsDuration
+        -uint64 _lockupDuration
+        -mapping _balances
         -mapping userRewardPerTokenPaid
         -mapping rewards
         -mapping unlockTime
-        -uint256 PRECISION
-        +constructor(stakingToken, rewardsToken, owner)
+        +constructor(staking, rewards, owner, rewardsDuration, lockupDuration)
         -updateReward(account)*
-        -_rewardPerToken() uint256
-        -_earned(account) uint256
+        -_earned(account, rpt) uint256
+        -_payoutReward(account)
     }
 
     class Ownable2Step {
@@ -60,15 +61,9 @@ classDiagram
         +acceptOwnership()
     }
 
-    class ReentrancyGuard {
-        <<OpenZeppelin>>
+    class ReentrancyGuardTransient {
+        <<OpenZeppelin EIP-1153>>
         +nonReentrant*
-    }
-
-    class Pausable {
-        <<OpenZeppelin opcional>>
-        +pause()
-        +unpause()
     }
 
     class SafeERC20 {
@@ -98,6 +93,7 @@ classDiagram
         TransferFailed()
         LockupActive()
         ZeroAddress()
+        RewardRateTooHigh()
     }
 
     class StakingEvents {
@@ -111,19 +107,18 @@ classDiagram
     }
 
     class StakingClient {
-        <<frontend ethers v6 opcional>>
+        <<frontend Next.js + ethers v6>>
         +connectWallet()
-        +approveStake()
         +stake()
         +withdraw()
         +getReward()
+        +exit()
         +earned()
     }
 
     IStakingRewards <|.. StakingRewards
     Ownable2Step <|-- StakingRewards
-    ReentrancyGuard <|-- StakingRewards
-    Pausable <|-- StakingRewards : opcional
+    ReentrancyGuardTransient <|-- StakingRewards
     StakingRewards ..> SafeERC20
     StakingRewards ..> IERC20 : staking + rewards
     StakingRewards ..> StakingErrors
@@ -142,10 +137,10 @@ classDiagram
 | `IStakingRewards` | Superficie pública estable para tests, scripts y UI |
 | `StakingRewards` | Contabilidad O(1), lockup, periodos de reward, CEI |
 | OZ Ownable2Step | Admin: notify, durations, ownership 2-step |
-| OZ ReentrancyGuard | Blindaje en withdraw/getReward/exit |
+| OZ ReentrancyGuardTransient | Blindaje mutators (Cancun / EIP-1153) |
 | `SafeERC20` | Transfers ERC-20 sin asumir retorno bool clásico |
 | `MockERC20` | Tokens de prueba / demo |
-| `StakingClient` | Solo si se autoriza Fase 6 |
+| `StakingClient` | Demo Fase 6 (`frontend/`) |
 
 ---
 
@@ -154,12 +149,12 @@ classDiagram
 ```text
 Global:
   rewardPerTokenStored   // acumulador escalado
-  rewardRate             // tokens reward / segundo (escalado en uso)
-  lastUpdateTime
-  periodFinish
+  rewardRate             // tokens reward / segundo
+  lastUpdateTime         // uint64 packed
+  periodFinish           // uint64 packed
   totalSupply            // total staked
-  rewardsDuration
-  lockupDuration
+  rewardsDuration        // uint64 packed
+  lockupDuration         // uint64 packed
 
 Por usuario:
   balances[user]
@@ -183,25 +178,22 @@ earned(user) =
   + balances[user] * (rewardPerToken - userRewardPerTokenPaid[user]) / PRECISION
 ```
 
-`PRECISION`: **`1e18`** (congelado Fase 1). Detalle completo: [`04-modelo-matematico.md`](./04-modelo-matematico.md).
+`PRECISION`: **`1e18`**. Detalle: [`04-modelo-matematico.md`](./04-modelo-matematico.md).
 
 ---
 
-## 4. Layout Solidity esperado
+## 4. Layout Solidity (implementado)
 
 1. SPDX + `pragma solidity 0.8.24;`
-2. Imports
-3. Errores / eventos (o en interfaz)
-4. Constantes (`PRECISION`)
-5. Variables de estado (packing consciente)
-6. Constructor
-7. Modifiers (`updateReward`)
-8. Externals → publics → internals → privates
-9. Views de math al final o junto a mutators según legibilidad
+2. Imports OZ + interfaz
+3. Estado (immutables, packing `uint64` ×4, mappings)
+4. Modifier `updateReward`
+5. Constructor
+6. Views → mutators → admin → privados (`_earned`, `_payoutReward`)
 
 ---
 
-## 5. Decisiones de diseño (Fase 1)
+## 5. Decisiones de diseño (v1)
 
 | Tema | Decisión |
 |------|----------|
@@ -210,3 +202,4 @@ earned(user) =
 | `exit()` | Sí |
 | Fee-on-transfer / rebase | No soportado (ERC-20 honestos) |
 | `notifyRewardAmount` | Tokens ya en el contrato; solo actualiza contabilidad |
+| Guard | `ReentrancyGuardTransient` (no storage clásico) |

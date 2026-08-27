@@ -1,6 +1,8 @@
 # Plan de implementación — Staking & Reward Distribution (Módulo 03)
 
-Documento maestro del módulo. Define fases, entregables, criterios de aceptación y el **protocolo de autorización** obligatorio antes de cada avance.
+Documento maestro del módulo. Define fases, entregables, criterios de aceptación y el **protocolo de autorización** usado durante el desarrollo.
+
+> **Estado actual:** Fases **0–7** ✅ (2026-08-27). Ver [`HANDOFF.md`](./HANDOFF.md).
 
 ---
 
@@ -27,13 +29,13 @@ Construir un **protocolo de staking con distribución proporcional de rewards en
 
 - Use el algoritmo estilo **Synthetix** (`rewardPerTokenStored` + `userRewardPerTokenPaid` + `rewards`).
 - Acumule rewards con `lastUpdateTime` y `rewardRate` **sin loops** sobre usuarios.
-- Maneje precisión interna con scaling (`1e18` o `1e36`).
+- Maneje precisión interna con scaling fijo **`PRECISION = 1e18`**.
 - Soporte **periodos de reward** y **lockups dinámicos** (unstake sujeto a unlock).
-- Maneje tokens ERC-20 de stake y reward de forma segura (`SafeERC20` / checks explícitos).
+- Maneje tokens ERC-20 de stake y reward de forma segura (`SafeERC20`).
 - Aplique **CEI**, custom errors y NatSpec.
-- Incluya suite Foundry: unit + `vm.warp` + fuzz + invariante  
-  `balance(vault) == totalStaked + unassignedRewards` (según modelo de tokens).
-- (Opcional v1.1) Frontend Next.js + ethers.js v6 para demo.
+- Incluya suite Foundry: unit + `vm.warp` + fuzz + invariante de **solvencia**  
+  (`rewardsToken.balance >= pendingClaimable`; stake `>= totalStaked`).
+- Frontend demo Next.js + ethers v6 (Fase 6 ✅).
 
 ---
 
@@ -43,10 +45,10 @@ Construir un **protocolo de staking con distribución proporcional de rewards en
 |------|------------|--------|
 | Contratos | Solidity `0.8.24` (pragma fijo) | Sin floating pragma |
 | Tooling | Foundry (`forge`, `cast`, `anvil`) | Unit, fuzz, invariant, gas |
-| Librerías | OpenZeppelin v5.x | `SafeERC20`, `Ownable2Step`, `ReentrancyGuard`, `Pausable` según diseño |
-| Modelo matemático | Accumulator Synthetix-style | O(1) por usuario |
-| Frontend (fase opcional) | Next.js App Router + TS + ethers v6 + Zod | Reglas `nextjs.cursorrules` |
-| Tests UI | Vitest + RTL | Solo si se autoriza fase frontend |
+| Librerías | OpenZeppelin **v5.2** | `SafeERC20`, `Ownable2Step`, `ReentrancyGuardTransient` (sin Pausable v1) |
+| Modelo matemático | Accumulator Synthetix-style | O(1); `PRECISION = 1e18` |
+| Frontend | Next.js App Router + TS + ethers v6 + Zod | `frontend/src/` (Fase 6 ✅) |
+| Tests UI | Vitest + RTL | `frontend` — `npm test` |
 
 **Fuera de alcance en v1 (salvo autorización explícita):** multi-reward tokens, veToken/boost, liquid staking, bridges, The Graph, mainnet production hardening.
 
@@ -66,7 +68,7 @@ Usuario (MetaMask / cast)
                           ┌────────────┼────────────────┐
                           ▼            ▼                ▼
                    balances[]    reward math      lockup / period
-                   totalSupply   rewardPerToken   finishAt / unlock
+                   totalSupply   rewardPerToken   periodFinish / unlock
                           │            │
                           ▼            ▼
                    stakingToken   rewardsToken (IERC20)
@@ -80,29 +82,33 @@ Diagramas:
 
 ---
 
-## 4. Estructura de repositorio prevista
+## 4. Estructura de repositorio (final)
 
 ```
 03-staking/
 ├── .cursorrules
-├── doc/                              # Plan y diagramas (este directorio)
+├── README.md
+├── doc/                              # Plan, diagramas, HANDOFF, ABI
 ├── foundry.toml
 ├── remappings.txt
 ├── src/
 │   ├── interfaces/IStakingRewards.sol
 │   ├── StakingRewards.sol
-│   └── mocks/MockERC20.sol           # solo tests / demo
+│   └── mocks/MockERC20.sol
 ├── script/
-│   └── Deploy.s.sol
+│   ├── Deploy.s.sol
+│   └── export-abi.sh
 ├── test/
-│   ├── unit/StakingRewards.t.sol
+│   ├── StakingRewards.t.sol          # unit core
+│   ├── unit/StakingRewards.phase3.t.sol
 │   ├── fuzz/StakingRewards.fuzz.t.sol
 │   ├── invariant/StakingRewards.invariant.t.sol
-│   └── attack/                     # reentrancy / griefing si aplica
-└── frontend/                       # solo si se autoriza fase UI
-    ├── app/
-    ├── components/
-    ├── lib/
+│   └── attack/ReentrancyAttack.t.sol
+└── frontend/
+    ├── src/app/
+    ├── src/components/
+    ├── src/hooks/
+    ├── src/lib/
     └── abi/
 ```
 
@@ -122,21 +128,23 @@ Diagramas:
 | Views | `earned`, `rewardPerToken`, `balanceOf`, `totalSupply`, `lastTimeRewardApplicable` |
 | Modifier | `updateReward(account)` en mutators de usuario |
 
-### Errores custom (mínimo según `.cursorrules`)
+### Errores custom (v1)
 
 - `ZeroAmount()`
 - `RewardPeriodActive()`
 - `InsufficientStake()`
-- `TransferFailed()`
-- (+ adicionales documentados: `LockupActive()`, `ZeroAddress()`, etc. si el diseño lo exige)
+- `TransferFailed()` — reservado en interfaz; impl usa SafeERC20/OZ
+- `LockupActive()`
+- `ZeroAddress()`
+- `RewardRateTooHigh()`
 
 ### Invariante de vault
 
 ```text
-balanceOf(stakingToken, vault) >= totalStaked
-balanceOf(rewardsToken, vault) >= rewards pendientes + residual no asignado
-# Forma acordada en Fase 1:
-# vault_balance_relevant == totalStaked + unassignedRewards
+rewardsToken.balanceOf(vault) >= pendingClaimable
+stakingToken.balanceOf(vault) >= totalStaked
+# Same-token: balance cubre stake + reward residual
+# Donaciones → puede ser estrictamente >; no exigir ==
 ```
 
 ---
@@ -153,8 +161,8 @@ balanceOf(rewardsToken, vault) >= rewards pendientes + residual no asignado
 | 3 | Lockup dinámico + `notifyRewardAmount` / duración | ✅ Aprobada (2026-08-26) |
 | 4 | Fuzz + invariantes + ataques / gas report | ✅ Aprobada (2026-08-26) |
 | 5 | Scripts deploy + ABI | ✅ Aprobada (2026-08-26) |
-| 6 | Frontend demo (opcional) | 🔒 Pendiente de autorización |
-| 7 | Docs finales, handoff, alineación diagramas | 🔒 Pendiente de autorización |
+| 6 | Frontend demo (opcional) | ✅ Aprobada (2026-08-27) |
+| 7 | Docs finales, handoff, alineación diagramas | ✅ Aprobada (2026-08-27) |
 
 ---
 
@@ -232,7 +240,7 @@ Congelar interfaz, errores, eventos y fórmulas; escribir tests que fallen / esq
 #### Resultado
 
 - `src/interfaces/IStakingRewards.sol` — events, errors, views, mutators, NatSpec + fórmulas.
-- `src/StakingRewards.sol` — esqueleto Ownable2Step + ReentrancyGuard; views math; mutators → `NotImplemented`.
+- `src/StakingRewards.sol` — esqueleto Ownable2Step + ReentrancyGuardTransient; views math; mutators → `NotImplemented`.
 - `src/mocks/MockERC20.sol` — mint para tests.
 - `test/StakingRewards.t.sol` — 7 tests verdes (constructor, views, NotImplemented).
 - `test/unit/StakingRewards.lifecycle.t.sol` — 2 tests **rojos** TDD (lifecycle + prorrateo 2 stakers).
@@ -263,7 +271,7 @@ Implementar accumulator + `updateReward` + stake / withdraw / getReward con CEI 
 1. Estado: `rewardPerTokenStored`, `userRewardPerTokenPaid`, `rewards`, `balances`, `totalSupply`, `rewardRate`, `periodFinish`, `lastUpdateTime`.
 2. Modifier `updateReward(address account)`.
 3. `stake` / `withdraw` / `getReward` con CEI.
-4. Scaling factor (`1e18` o `1e36`) justificado en NatSpec.
+4. Scaling factor (`PRECISION = 1e18`) justificado en NatSpec.
 5. Unit tests con `vm.warp` / `vm.roll` para accrual exacto.
 6. Casos: zero amount, insufficient stake, transfer fail.
 
@@ -277,7 +285,7 @@ Implementar accumulator + `updateReward` + stake / withdraw / getReward con CEI 
 #### Resultado
 
 - `StakingRewards.sol` completo: `updateReward`, stake/withdraw/getReward/exit, `notifyRewardAmount`, set durations.
-- SafeERC20 + ReentrancyGuard + CEI; `PRECISION = 1e18`.
+- SafeERC20 + ReentrancyGuardTransient + CEI; `PRECISION = 1e18`.
 - Same-token: solvencia de notify descuenta `totalSupply` del balance.
 - Lockup básico: `unlockTime = now + lockupDuration` en stake; `LockupActive` en withdraw/exit (detalle/borde en Fase 3).
 - Suite: **16 tests verdes** (core + lifecycle).
@@ -447,7 +455,7 @@ Demo Next.js: conectar wallet, stake, claim, unstake, ver `earned`.
 
 ### Fase 7 — Docs finales y handoff
 
-**Estado:** 🔒 Pendiente de autorización  
+**Estado:** ✅ Completada (2026-08-27)  
 **Duración estimada:** 0.5–1 día  
 **Depende de:** Fase 5 ✅ (y Fase 6 si no se omitió)
 
@@ -464,13 +472,13 @@ Alinear diagramas con código final; README usable por un tercero.
 
 #### Criterios de aceptación
 
-- [ ] `doc/` coherente con implementación.
-- [ ] Tercero puede testear/deploy siguiendo docs.
+- [x] `doc/` coherente con implementación.
+- [x] Tercero puede testear/deploy siguiendo docs.
 
 #### Aprobación
 
-- [ ] Autorizada para ejecutar  
-- [ ] Completada y revisada → ✅ + fecha
+- [x] Autorizada para ejecutar  
+- [x] Completada y revisada → ✅ 2026-08-27
 
 > **No iniciar Fase 7 sin:** `Autorizo Fase 7`
 
@@ -486,23 +494,23 @@ Alinear diagramas con código final; README usable por un tercero.
 [x] Fase 4  Fuzz / invariant / gas     → ✅ 2026-08-26
 [x] Fase 5  Deploy + ABI               → ✅ 2026-08-26
 [x] Fase 6  Frontend (opcional)        → ✅ 2026-08-27
-[ ] Fase 7  Docs finales               → requiere: Autorizo Fase 7
+[x] Fase 7  Docs finales               → ✅ 2026-08-27
 ```
 
 ---
 
 ## 8. Definition of Done (global)
 
-1. `pragma solidity 0.8.24` fijo.
-2. Rewards O(1); sin iterar usuarios.
-3. `updateReward` en `stake` / `withdraw` / `getReward`.
-4. Scaling factor documentado; precisión verificada en tests con warp.
-5. CEI + SafeERC20; custom errors.
-6. Lockup dinámico y periodos de reward con `RewardPeriodActive` donde corresponda.
-7. Suite: unit + fuzz + invariant (+ ataque reentrancy).
-8. Invariante de vault respetada.
-9. Diagramas y plan actualizados al cerrar.
-10. Frontend solo si la Fase 6 fue autorizada.
+1. [x] `pragma solidity 0.8.24` fijo.
+2. [x] Rewards O(1); sin iterar usuarios.
+3. [x] `updateReward` en `stake` / `withdraw` / `getReward` (y `exit` / `notify`).
+4. [x] Scaling factor documentado (`PRECISION = 1e18`); precisión verificada en tests con warp.
+5. [x] CEI + SafeERC20; custom errors.
+6. [x] Lockup dinámico y periodos de reward con `RewardPeriodActive` donde corresponda.
+7. [x] Suite: unit + fuzz + invariant (+ ataque reentrancy).
+8. [x] Invariante de vault respetada.
+9. [x] Diagramas y plan actualizados al cerrar (`HANDOFF.md`, clases alineadas a Transient).
+10. [x] Frontend autorizado e implementado (Fase 6).
 
 ---
 
@@ -510,18 +518,17 @@ Alinear diagramas con código final; README usable por un tercero.
 
 | Riesgo | Mitigación |
 |--------|------------|
-| Precisión / dust en división | Scaling `1e18`/`1e36`; fuzz + asserts de acotación |
+| Precisión / dust en división | Scaling `1e18`; fuzz + asserts de acotación |
 | `notifyRewardAmount` mal calibrado | Tests mid-period; leftover explícito |
 | Lockup griefing UX | Eventos + views `unlockTime`; docs claras |
-| Reentrancy en claim/withdraw | CEI + ReentrancyGuard + test malicioso |
-| Token fee-on-transfer | Fuera de alcance v1 o medir delta (decidir en Fase 1) |
+| Reentrancy en claim/withdraw | CEI + ReentrancyGuardTransient + test malicioso |
+| Token fee-on-transfer | Fuera de alcance v1 |
 | Avance sin review | **Protocolo de autorización por fase** |
 
 ---
 
 ## 10. Próximo paso inmediato
 
-**Estado actual:** Fases **0–6** cerradas (incluye demo Next.js).
-**Siguiente:** **Fase 7** (docs finales y handoff).
+**Estado actual:** Fases **0–7** cerradas. Módulo listo para handoff.
 
-Responde: **`Autorizo Fase 7`**.
+Entrada recomendada para un tercero: [`HANDOFF.md`](./HANDOFF.md).

@@ -1,6 +1,6 @@
 # Auditoría SWC — StakingRewards
 
-Verificación de `StakingRewards` contra el [SWC Registry](https://swcregistry.io/) (EIP-1470) y principios del monorepo (CEI, ReentrancyGuard, O(1), custom errors, SafeERC20).
+Verificación de `StakingRewards` contra el [SWC Registry](https://swcregistry.io/) (EIP-1470) y principios del monorepo (CEI, `ReentrancyGuardTransient`, O(1), custom errors, SafeERC20).
 
 > **Nota:** El SWC Registry no se mantiene activamente desde ~2020. Complementar con [SCSVS](https://github.com/ComposableSecurity/SCSVS) y [EEA EthTrust](https://entethalliance.org/specs/ethtrust/).
 

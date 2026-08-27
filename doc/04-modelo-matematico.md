@@ -1,6 +1,6 @@
-# Modelo matemático e invariantes — StakingRewards (Fase 1)
+# Modelo matemático e invariantes — StakingRewards
 
-Congelado en Fase 1. La implementación (Fase 2+) debe respetar estas definiciones.
+Canónico para implementación y handoff (Fases 1–7). El código debe respetar estas definiciones.
 
 ---
 
@@ -62,10 +62,18 @@ si no:
   leftover = (periodFinish - timestamp) * rewardRate
   rewardRate = (reward + leftover) / rewardsDuration
 
-exigir: rewardRate <= rewardsToken.balanceOf(vault) / rewardsDuration
-periodFinish = timestamp + rewardsDuration
+balance = rewardsToken.balanceOf(vault)
+si stakingToken == rewardsToken:
+  balance = balance - totalSupply   // no contar el stake como reward
+
+exigir: rewardRate <= balance / rewardsDuration
+  sino revert RewardRateTooHigh
+
+periodFinish = timestamp + rewardsDuration   // overflow uint64 → ZeroAmount
 lastUpdateTime = timestamp
 ```
+
+Los tokens de reward deben estar **ya** en el vault (no hay `transferFrom` en `notify`).
 
 ---
 
@@ -91,9 +99,8 @@ lastUpdateTime = timestamp
 
 3. **Mismo token (stake == reward):**  
    `token.balanceOf(vault) >= totalStaked + pendingClaimable`  
-   Equivalente a la forma del `.cursorrules`:  
-   `balance == totalStaked + unassignedRewards`  
-   con `unassignedRewards >= pendingClaimable` (dust ⊆ unassigned).
+   Con `unassignedRewards = balance - totalStaked` (puede incluir dust y surplus):  
+   `unassignedRewards >= pendingClaimable`. Donaciones → `>` estricto es OK.
 
 4. **Forma operativa en handlers Foundry:**  
    tras cada secuencia, assert de (1) y (2)/(3) según configuración del pool.
