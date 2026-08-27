@@ -414,7 +414,7 @@ Deploy reproducible en Anvil/testnet y export de ABI para UI.
 
 ### Fase 6 — Frontend demo (opcional)
 
-**Estado:** 🔒 Pendiente de autorización  
+**Estado:** ✅ Completada (2026-08-27)  
 **Duración estimada:** 2–3 días  
 **Depende de:** Fase 5 ✅
 
@@ -432,14 +432,14 @@ Demo Next.js: conectar wallet, stake, claim, unstake, ver `earned`.
 
 #### Criterios de aceptación
 
-- [ ] Flujo feliz documentado.
-- [ ] `next build` OK.
-- [ ] Tests UI mínimos verdes.
+- [x] Flujo feliz documentado (`doc/FRONTEND.md`).
+- [x] `next build` OK.
+- [x] Tests UI mínimos verdes.
 
 #### Aprobación
 
-- [ ] Autorizada para ejecutar (o **omitida** por decisión)  
-- [ ] Completada / omitida → ✅ o ⏸️ + fecha
+- [x] Autorizada para ejecutar (o **omitida** por decisión)  
+- [x] Completada / omitida → ✅ 2026-08-27
 
 > **No iniciar Fase 6 sin:** `Autorizo Fase 6` (o `Omitir Fase 6`)
 
@@ -485,7 +485,7 @@ Alinear diagramas con código final; README usable por un tercero.
 [x] Fase 3  Lockup + notify            → ✅ 2026-08-26
 [x] Fase 4  Fuzz / invariant / gas     → ✅ 2026-08-26
 [x] Fase 5  Deploy + ABI               → ✅ 2026-08-26
-[ ] Fase 6  Frontend (opcional)        → requiere: Autorizo Fase 6 | Omitir
+[x] Fase 6  Frontend (opcional)        → ✅ 2026-08-27
 [ ] Fase 7  Docs finales               → requiere: Autorizo Fase 7
 ```
 
@@ -521,7 +521,7 @@ Alinear diagramas con código final; README usable por un tercero.
 
 ## 10. Próximo paso inmediato
 
-**Estado actual:** Fases **0–5** cerradas (incluye deploy Anvil + ABI).  
-**Siguiente:** **Fase 6** (frontend opcional) o **Fase 7** (docs finales).
+**Estado actual:** Fases **0–6** cerradas (incluye demo Next.js).
+**Siguiente:** **Fase 7** (docs finales y handoff).
 
-Responde: **`Autorizo Fase 6`** | **`Omitir Fase 6`** | **`Autorizo Fase 7`**.
+Responde: **`Autorizo Fase 7`**.
