@@ -8,10 +8,12 @@
 | [02-diagrama-flujo.md](./02-diagrama-flujo.md) | Diagrama de flujo / secuencias (stake, claim, unstake, notify) |
 | [03-flujograma.md](./03-flujograma.md) | Flujograma de decisiones (sí/no) por operación |
 | [04-modelo-matematico.md](./04-modelo-matematico.md) | Fórmulas, PRECISION, invariante, decisiones v1 |
+| [05-decisiones-logica-gas.md](./05-decisiones-logica-gas.md) | Decisiones técnicas, lógica del protocolo, margen de gas |
 | [GAS.md](./GAS.md) | Baseline de gas y tradeoffs (Fase 4) |
 | [DEPLOY.md](./DEPLOY.md) | Playbook Anvil / testnet + export ABI |
 | [FRONTEND.md](./FRONTEND.md) | Demo Next.js — setup y flujo feliz (Fase 6) |
 | [SWC-AUDIT.md](./SWC-AUDIT.md) | Auditoría SWC-100–136 + principios suite |
 | [ATAQUES.md](./ATAQUES.md) | Campañas de ataque defensivas A–E |
+| [../portfolio/](../portfolio/) | Página portafolio estática (ES/EN) |
 
 > Módulo **cerrado** (Fases 0–7 ✅). Volver al README: [`../README.md`](../README.md).

@@ -13,8 +13,8 @@ import {IStakingRewards} from "./interfaces/IStakingRewards.sol";
  * @title StakingRewards
  * @notice Pool de staking con distribución de rewards O(1) estilo Synthetix.
  * @dev Accumulator + CEI + SafeERC20 + `ReentrancyGuardTransient` (EIP-1153, Cancun).
- *      Gas: packing uint64 de tiempos/durations; cache `msg.sender`/`rewardPerToken`;
- *      `unchecked` en restas tras checks.
+ *      Gas: packing uint64; cache `msg.sender`/`rewardPerToken`; `unchecked` en restas;
+ *      Yul en hot paths (`rewardPerToken` / `_earned` / min timestamp / SLOAD packed).
  *
  * Stake y reward pueden ser el mismo token; en ese caso el check de solvencia de `notify`
  * descuenta `totalSupply` del balance del vault.
@@ -127,25 +127,51 @@ contract StakingRewards is IStakingRewards, Ownable2Step, ReentrancyGuardTransie
     }
 
     /// @inheritdoc IStakingRewards
-    function lastTimeRewardApplicable() public view returns (uint256) {
+    function lastTimeRewardApplicable() public view returns (uint256 applicable) {
         uint256 finish = _periodFinish;
-        return block.timestamp < finish ? block.timestamp : finish;
+        assembly ("memory-safe") {
+            applicable := timestamp()
+            if gt(applicable, finish) { applicable := finish }
+        }
     }
 
     /// @inheritdoc IStakingRewards
     function rewardPerToken() public view returns (uint256) {
         uint256 supply = _totalSupply;
+        uint256 stored = rewardPerTokenStored;
         if (supply == 0) {
-            return rewardPerTokenStored;
+            return stored;
         }
-        uint256 applicable = lastTimeRewardApplicable();
-        uint256 last = _lastUpdateTime;
+
+        // Un solo SLOAD del slot packed: finish | lastUpdate | durations.
+        uint256 finish;
+        uint256 last;
+        assembly ("memory-safe") {
+            let packed := sload(_periodFinish.slot)
+            finish := and(packed, 0xffffffffffffffff)
+            last := and(shr(64, packed), 0xffffffffffffffff)
+        }
+
+        uint256 applicable;
+        assembly ("memory-safe") {
+            applicable := timestamp()
+            if gt(applicable, finish) { applicable := finish }
+        }
         if (applicable <= last) {
-            return rewardPerTokenStored;
+            return stored;
         }
+
+        uint256 rate = rewardRate;
+        uint256 precision = PRECISION;
+        uint256 incr;
         unchecked {
-            return rewardPerTokenStored + ((applicable - last) * rewardRate * PRECISION) / supply;
+            uint256 delta = applicable - last;
+            // incr = delta * rate * PRECISION / supply (misma semántica que el unchecked previo).
+            assembly ("memory-safe") {
+                incr := div(mul(mul(delta, rate), precision), supply)
+            }
         }
+        return stored + incr;
     }
 
     /// @inheritdoc IStakingRewards
@@ -261,9 +287,23 @@ contract StakingRewards is IStakingRewards, Ownable2Step, ReentrancyGuardTransie
 
     /**
      * @dev `earned` con `rewardPerToken` ya materializado (evita recálculo).
+     *      Hot path en Yul: `(balance * (rpt - paid)) / PRECISION + pending`.
      */
-    function _earned(address account, uint256 rpt) private view returns (uint256) {
-        return _balances[account] * (rpt - userRewardPerTokenPaid[account]) / PRECISION + rewards[account];
+    function _earned(address account, uint256 rpt) private view returns (uint256 result) {
+        uint256 bal = _balances[account];
+        uint256 paid = userRewardPerTokenPaid[account];
+        uint256 pending = rewards[account];
+        // Invariante del acumulador: rpt >= paid tras `updateReward`.
+        if (rpt < paid) {
+            return pending;
+        }
+        uint256 precision = PRECISION;
+        unchecked {
+            uint256 deltaRpt = rpt - paid;
+            assembly ("memory-safe") {
+                result := add(div(mul(bal, deltaRpt), precision), pending)
+            }
+        }
     }
 
     /**

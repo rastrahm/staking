@@ -46,6 +46,7 @@ Detalle: [`DEPLOY.md`](./DEPLOY.md) · [`FRONTEND.md`](./FRONTEND.md).
 | [`INDEX.md`](./INDEX.md) | Índice |
 | [`00-plan-implementacion.md`](./00-plan-implementacion.md) | Fases y DoD |
 | [`04-modelo-matematico.md`](./04-modelo-matematico.md) | Fórmulas + invariante |
+| [`05-decisiones-logica-gas.md`](./05-decisiones-logica-gas.md) | Decisiones, lógica, margen de gas |
 | [`01-diagrama-clases.md`](./01-diagrama-clases.md) · [`02`](./02-diagrama-flujo.md) · [`03`](./03-flujograma.md) | Clases / secuencias / flujogramas |
 | [`GAS.md`](./GAS.md) | Baseline gas |
 | [`SWC-AUDIT.md`](./SWC-AUDIT.md) · [`ATAQUES.md`](./ATAQUES.md) | Seguridad |
