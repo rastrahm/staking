@@ -25,6 +25,7 @@ Protocolo de staking con distribución proporcional de rewards en **O(1)** (esti
 | [`doc/INDEX.md`](doc/INDEX.md) | Índice completo |
 | [`doc/00-plan-implementacion.md`](doc/00-plan-implementacion.md) | Plan por fases + DoD |
 | [`doc/04-modelo-matematico.md`](doc/04-modelo-matematico.md) | Fórmulas e invariante |
+| [`doc/05-decisiones-logica-gas.md`](doc/05-decisiones-logica-gas.md) | Decisiones, lógica y margen de gas |
 | [`doc/DEPLOY.md`](doc/DEPLOY.md) | Deploy Anvil / testnet + ABI |
 | [`doc/FRONTEND.md`](doc/FRONTEND.md) | Demo UI |
 | [`doc/01-diagrama-clases.md`](doc/01-diagrama-clases.md) | Clases |
@@ -33,6 +34,7 @@ Protocolo de staking con distribución proporcional de rewards en **O(1)** (esti
 | [`doc/GAS.md`](doc/GAS.md) | Gas |
 | [`doc/SWC-AUDIT.md`](doc/SWC-AUDIT.md) | Auditoría SWC |
 | [`doc/ATAQUES.md`](doc/ATAQUES.md) | Campañas de ataque |
+| [`portfolio/`](portfolio/) | Página portafolio (ES/EN) |
 
 ---
 

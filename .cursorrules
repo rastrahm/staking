@@ -25,6 +25,7 @@ O(1) staking + proportional rewards (Synthetix-style), dynamic lockup, Foundry +
 - **CEI** before external transfers; `nonReentrant` on user mutators.
 - **Custom errors:** `ZeroAmount`, `RewardPeriodActive`, `InsufficientStake`, `TransferFailed` (reservado), `LockupActive`, `ZeroAddress`, `RewardRateTooHigh`.
 - **Packing:** `_periodFinish`, `_lastUpdateTime`, `_rewardsDuration`, `_lockupDuration` as `uint64` (one slot).
+- **Yul hot paths:** `rewardPerToken` / `_earned` / timestamp min / packed SLOAD (math only; CEI + SafeERC20 intact).
 - **Lockup:** each `stake` resets `unlockTime = now + lockupDuration`; claim OK during lockup; withdraw/exit not.
 - **notify:** tokens already in vault; if same token, solvency uses `balance - totalSupply`.
 
