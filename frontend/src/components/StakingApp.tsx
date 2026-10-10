@@ -23,7 +23,7 @@ export function StakingApp() {
         <h2 className="panel-title">Falta configuración</h2>
         <p className="muted">
           Copia <code>.env.example</code> → <code>.env.local</code> con las
-          addresses del deploy Anvil (ver <code>doc/DEPLOY.md</code>).
+          addresses del deploy Anvil (ver <code>doc/DEPLOY-ES.md</code>).
         </p>
         <pre className="error-box">
           {envResult.success ? "Env incompleto" : envResult.error.message}

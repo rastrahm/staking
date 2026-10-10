@@ -1,7 +1,7 @@
 # Guía de comprensión — StakingRewards (v1)
 
 Documento para **entender** el módulo: decisiones técnicas, lógica del protocolo y margen real de mejora de gas.  
-Complementa [`04-modelo-matematico.md`](./04-modelo-matematico.md), [`GAS.md`](./GAS.md) y [`HANDOFF.md`](./HANDOFF.md).
+Complementa [`04-modelo-matematico-ES.md`](./04-modelo-matematico-ES.md), [`GAS-ES.md`](./GAS-ES.md) y [`HANDOFF-ES.md`](./HANDOFF-ES.md).
 
 ---
 
@@ -147,7 +147,7 @@ No podés “retirar 125” mezclando 100 de stake + 25 de reward en una sola ll
 
 ## 4. Gas: qué ya se hizo
 
-Medido en `doc/GAS.md` (antes → después):
+Medido en `doc/GAS-ES.md` (antes → después):
 
 | Función | Δ avg |
 |---------|-------|
@@ -179,7 +179,7 @@ Sí, pero el **margen residual** es menor: v1 ya está en el terreno típico de 
 | Menos getters `public` / views en el bytecode | Deploy más barato | Peor DX / ABI menos clara |
 | Empaquetar más estado de usuario (difícil) | Menos SSTORE | Mappings por address no se packean fácil entre sí |
 | `calldata` / structs en admin | Cosmético | Poco uso |
-| ~~Assembler / Yul en hot paths~~ | **Aplicado (2026-09-16)** — ver `GAS.md` | Auditable peor; ahorro marginal |
+| ~~Assembler / Yul en hot paths~~ | **Aplicado (2026-09-16)** — ver `GAS-ES.md` | Auditable peor; ahorro marginal |
 | Quitar `SafeERC20` y asumir IERC20 clásico | Menos código | Rompe tokens “raros”; mala idea |
 | `short-circuit` si `amount` no cambia earned en edge cases | Micro | Complejidad / bugs |
 
@@ -212,9 +212,9 @@ Para un portfolio / producción educativa, el cuello de botella real ya no es �
 | Views math | `lastTimeRewardApplicable`, `rewardPerToken`, `earned` |
 | Mutators usuario | `stake`, `withdraw`, `getReward`, `exit` |
 | Admin | `notifyRewardAmount`, `setRewardsDuration`, `setLockupDuration` |
-| Números de gas | `doc/GAS.md` |
-| SWC | `doc/SWC-AUDIT.md` |
-| Invariantes | `doc/04-modelo-matematico.md` |
+| Números de gas | `doc/GAS-ES.md` |
+| SWC | `doc/SWC-AUDIT-ES.md` |
+| Invariantes | `doc/04-modelo-matematico-ES.md` |
 
 ---
 

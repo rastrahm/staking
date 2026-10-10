@@ -1,6 +1,6 @@
 # Flujograma — Staking & Reward Distribution
 
-Diagramas de decisión (sí/no) alineados al código v1. Secuencias: [`02-diagrama-flujo.md`](./02-diagrama-flujo.md). Handoff: [`HANDOFF.md`](./HANDOFF.md).
+Diagramas de decisión (sí/no) alineados al código v1. Secuencias: [`02-diagrama-flujo-ES.md`](./02-diagrama-flujo-ES.md). Handoff: [`HANDOFF-ES.md`](./HANDOFF-ES.md).
 
 Orden real de modifiers en mutators de usuario: `nonReentrant` → `updateReward` → cuerpo (checks de amount/lockup).
 

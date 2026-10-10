@@ -1,80 +1,49 @@
 # 03 — Staking & Reward Distribution
 
+O(1) staking protocol with proportional reward distribution (Synthetix-style). Solidity `0.8.24` + Foundry + Next.js demo.
+
 Protocolo de staking con distribución proporcional de rewards en **O(1)** (estilo Synthetix). Solidity `0.8.24` + Foundry + demo Next.js.
 
-**Estado:** Fases **0–7** ✅ (módulo cerrado para handoff).
+---
+
+## Choose your language / Elige tu idioma
+
+| | English | Español |
+|---|---|---|
+| **README** | [README-EN.md](./README-EN.md) | [README-ES.md](./README-ES.md) |
+| **Docs index / Índice de docs** | [doc/INDEX-EN.md](./doc/INDEX-EN.md) | [doc/INDEX-ES.md](./doc/INDEX-ES.md) |
 
 ---
 
-## Stack
+## Documentation / Documentación
 
-| Capa | Tecnología |
-|------|------------|
-| Contratos | Solidity `0.8.24`, OpenZeppelin v5.2 (`Ownable2Step`, `ReentrancyGuardTransient`, `SafeERC20`) |
-| Tooling | Foundry (`forge` / `cast` / `anvil`) |
-| Modelo | Accumulator `rewardPerTokenStored` |
-| UI demo | Next.js 15, ethers v6, Zod, Vitest |
-
----
-
-## Documentación
-
-| Documento | Contenido |
-|-----------|-----------|
-| [`doc/HANDOFF.md`](doc/HANDOFF.md) | **Empezar aquí** — límites, backlog, checklist tercero |
-| [`doc/INDEX.md`](doc/INDEX.md) | Índice completo |
-| [`doc/00-plan-implementacion.md`](doc/00-plan-implementacion.md) | Plan por fases + DoD |
-| [`doc/04-modelo-matematico.md`](doc/04-modelo-matematico.md) | Fórmulas e invariante |
-| [`doc/05-decisiones-logica-gas.md`](doc/05-decisiones-logica-gas.md) | Decisiones, lógica y margen de gas |
-| [`doc/DEPLOY.md`](doc/DEPLOY.md) | Deploy Anvil / testnet + ABI |
-| [`doc/FRONTEND.md`](doc/FRONTEND.md) | Demo UI |
-| [`doc/01-diagrama-clases.md`](doc/01-diagrama-clases.md) | Clases |
-| [`doc/02-diagrama-flujo.md`](doc/02-diagrama-flujo.md) | Secuencias |
-| [`doc/03-flujograma.md`](doc/03-flujograma.md) | Flujogramas |
-| [`doc/GAS.md`](doc/GAS.md) | Gas |
-| [`doc/SWC-AUDIT.md`](doc/SWC-AUDIT.md) | Auditoría SWC |
-| [`doc/ATAQUES.md`](doc/ATAQUES.md) | Campañas de ataque |
-| [`portfolio/`](portfolio/) | Página portafolio (ES/EN) |
+| Document / Documento | English | Español |
+|---|---|---|
+| Implementation plan / Plan de implementación | [EN](./doc/00-plan-implementacion-EN.md) | [ES](./doc/00-plan-implementacion-ES.md) |
+| Class diagram / Diagrama de clases | [EN](./doc/01-diagrama-clases-EN.md) | [ES](./doc/01-diagrama-clases-ES.md) |
+| Sequence diagrams / Diagramas de secuencia | [EN](./doc/02-diagrama-flujo-EN.md) | [ES](./doc/02-diagrama-flujo-ES.md) |
+| Flowcharts / Flujogramas | [EN](./doc/03-flujograma-EN.md) | [ES](./doc/03-flujograma-ES.md) |
+| Mathematical model / Modelo matemático | [EN](./doc/04-modelo-matematico-EN.md) | [ES](./doc/04-modelo-matematico-ES.md) |
+| Technical decisions, logic & gas / Decisiones técnicas, lógica y gas | [EN](./doc/05-decisiones-logica-gas-EN.md) | [ES](./doc/05-decisiones-logica-gas-ES.md) |
+| Attack campaigns / Campañas de ataque | [EN](./doc/ATAQUES-EN.md) | [ES](./doc/ATAQUES-ES.md) |
+| SWC audit / Auditoría SWC | [EN](./doc/SWC-AUDIT-EN.md) | [ES](./doc/SWC-AUDIT-ES.md) |
+| Gas report / Reporte de gas | [EN](./doc/GAS-EN.md) | [ES](./doc/GAS-ES.md) |
+| Deploy & ABI | [EN](./doc/DEPLOY-EN.md) | [ES](./doc/DEPLOY-ES.md) |
+| Frontend demo | [EN](./doc/FRONTEND-EN.md) | [ES](./doc/FRONTEND-ES.md) |
+| Handoff | [EN](./doc/HANDOFF-EN.md) | [ES](./doc/HANDOFF-ES.md) |
 
 ---
 
-## Uso rápido
+## Other resources / Otros recursos
+
+- Contract / Contrato: [`src/StakingRewards.sol`](./src/StakingRewards.sol)
+- ABI: [`doc/abi/`](./doc/abi/)
+- Frontend: [`frontend/`](./frontend/)
+- Portfolio (ES/EN): [`portfolio/`](./portfolio/)
+
+## Quick start
 
 ```bash
-export PATH="$HOME/.foundry/bin:$PATH"
-
 forge build
 forge test
-
-# Demo local
-anvil   # otra terminal
-forge script script/Deploy.s.sol:Deploy \
-  --rpc-url http://127.0.0.1:8545 \
-  --private-key 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 \
-  --broadcast
-
-./script/export-abi.sh
-
-cd frontend && cp .env.example .env.local && npm install && npm run dev
 ```
-
-Playbooks: [`doc/DEPLOY.md`](doc/DEPLOY.md) · [`doc/FRONTEND.md`](doc/FRONTEND.md) · [`doc/HANDOFF.md`](doc/HANDOFF.md).
-
----
-
-## Estructura
-
-```text
-src/           # StakingRewards + interfaces + mocks
-test/          # unit / fuzz / invariant / attack
-script/        # Deploy + export-abi
-lib/           # forge-std + openzeppelin-contracts
-doc/           # Plan, diagramas, auditoría, handoff, ABI
-frontend/      # Demo Next.js (ABIs en frontend/abi/)
-```
-
----
-
-## Definition of Done (resumen)
-
-Ver checklist completo en el plan §8. En corto: O(1) + CEI + SafeERC20 + custom errors + lockup/notify + suite Foundry + docs alineados + frontend demo.

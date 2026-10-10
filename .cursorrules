@@ -2,7 +2,7 @@
 
 ## MODULE OVERVIEW
 O(1) staking + proportional rewards (Synthetix-style), dynamic lockup, Foundry + Solidity 0.8.24.
-**v1 cerrado (Fases 0–7).** Fuente de verdad: `src/StakingRewards.sol` + `doc/HANDOFF.md`.
+**v1 cerrado (Fases 0–7).** Fuente de verdad: `src/StakingRewards.sol` + `doc/HANDOFF-ES.md`.
 
 ---
 

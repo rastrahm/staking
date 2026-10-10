@@ -35,7 +35,7 @@ cd frontend && cp .env.example .env.local   # addresses del log
 npm install && npm run dev                 # http://localhost:3000
 ```
 
-Detalle: [`DEPLOY.md`](./DEPLOY.md) · [`FRONTEND.md`](./FRONTEND.md).
+Detalle: [`DEPLOY-ES.md`](./DEPLOY-ES.md) · [`FRONTEND-ES.md`](./FRONTEND-ES.md).
 
 ---
 
@@ -43,13 +43,13 @@ Detalle: [`DEPLOY.md`](./DEPLOY.md) · [`FRONTEND.md`](./FRONTEND.md).
 
 | Doc | Para qué |
 |-----|----------|
-| [`INDEX.md`](./INDEX.md) | Índice |
-| [`00-plan-implementacion.md`](./00-plan-implementacion.md) | Fases y DoD |
-| [`04-modelo-matematico.md`](./04-modelo-matematico.md) | Fórmulas + invariante |
-| [`05-decisiones-logica-gas.md`](./05-decisiones-logica-gas.md) | Decisiones, lógica, margen de gas |
-| [`01-diagrama-clases.md`](./01-diagrama-clases.md) · [`02`](./02-diagrama-flujo.md) · [`03`](./03-flujograma.md) | Clases / secuencias / flujogramas |
-| [`GAS.md`](./GAS.md) | Baseline gas |
-| [`SWC-AUDIT.md`](./SWC-AUDIT.md) · [`ATAQUES.md`](./ATAQUES.md) | Seguridad |
+| [`INDEX-ES.md`](./INDEX-ES.md) | Índice |
+| [`00-plan-implementacion-ES.md`](./00-plan-implementacion-ES.md) | Fases y DoD |
+| [`04-modelo-matematico-ES.md`](./04-modelo-matematico-ES.md) | Fórmulas + invariante |
+| [`05-decisiones-logica-gas-ES.md`](./05-decisiones-logica-gas-ES.md) | Decisiones, lógica, margen de gas |
+| [`01-diagrama-clases-ES.md`](./01-diagrama-clases-ES.md) · [`02`](./02-diagrama-flujo-ES.md) · [`03`](./03-flujograma-ES.md) | Clases / secuencias / flujogramas |
+| [`GAS-ES.md`](./GAS-ES.md) | Baseline gas |
+| [`SWC-AUDIT-ES.md`](./SWC-AUDIT-ES.md) · [`ATAQUES-ES.md`](./ATAQUES-ES.md) | Seguridad |
 | Este archivo | Handoff + límites + backlog |
 
 ---
@@ -104,5 +104,5 @@ Detalle: [`DEPLOY.md`](./DEPLOY.md) · [`FRONTEND.md`](./FRONTEND.md).
 
 ## 8. Contacto de diseño
 
-Modelo e invariante canónicos: [`04-modelo-matematico.md`](./04-modelo-matematico.md).  
+Modelo e invariante canónicos: [`04-modelo-matematico-ES.md`](./04-modelo-matematico-ES.md).  
 Si el código diverge, **actualizar docs en el mismo PR** (no dejar handoff desfasado).

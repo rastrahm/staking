@@ -178,7 +178,7 @@ earned(user) =
   + balances[user] * (rewardPerToken - userRewardPerTokenPaid[user]) / PRECISION
 ```
 
-`PRECISION`: **`1e18`**. Detalle: [`04-modelo-matematico.md`](./04-modelo-matematico.md).
+`PRECISION`: **`1e18`**. Detalle: [`04-modelo-matematico-ES.md`](./04-modelo-matematico-ES.md).
 
 ---
 

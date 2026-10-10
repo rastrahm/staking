@@ -4,7 +4,7 @@
 > **Fuera de alcance:** scripts de exploit ofensivos o procedimientos para drenar fondos ajenos.
 
 Contrato: `src/StakingRewards.sol`  
-Auditoría: [`SWC-AUDIT.md`](./SWC-AUDIT.md)
+Auditoría: [`SWC-AUDIT-ES.md`](./SWC-AUDIT-ES.md)
 
 ---
 
@@ -97,4 +97,4 @@ Mitigación off-chain: `approve(0)` luego amount; o permit en el token.
 - Pausable / rescue de surplus  
 - Exploits ofensivos / PoC de drenado real  
 
-Ver [`SWC-AUDIT.md`](./SWC-AUDIT.md) sección informativos.
+Ver [`SWC-AUDIT-ES.md`](./SWC-AUDIT-ES.md) sección informativos.

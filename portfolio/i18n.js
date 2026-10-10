@@ -54,7 +54,7 @@ const I18N = {
     'gas.eyebrow': '// 03 — OPTIMIZACIÓN DE GAS',
     'gas.title': 'Hot paths más baratos',
     'gas.lead':
-      'Cada optimización documenta su <strong>tradeoff</strong> en <code>doc/GAS.md</code>. Baseline vs post-opt con <code>forge test --gas-report</code>. El deploy sube un poco (OZ 5.2 + getters); las rutas de usuario/admin <strong>bajan</strong>.',
+      'Cada optimización documenta su <strong>tradeoff</strong> en <code>doc/GAS-ES.md</code>. Baseline vs post-opt con <code>forge test --gas-report</code>. El deploy sube un poco (OZ 5.2 + getters); las rutas de usuario/admin <strong>bajan</strong>.',
     'gas.m1': 'notify avg',
     'gas.m2': 'withdraw avg',
     'gas.m3': 'exit avg',
@@ -77,7 +77,7 @@ const I18N = {
     'swc.eyebrow': '// 04 — VERIFICACIÓN SWC',
     'swc.title': 'SWC Registry · EIP-1470',
     'swc.lead':
-      'Matriz completa <strong>SWC-100 → SWC-136</strong> contra <code>StakingRewards</code>. Informe en <code>doc/SWC-AUDIT.md</code>. Conclusión: <strong>0 vulnerabilidades explotables</strong>; 3 ítems informativos (approve, timestamp, trust owner/tokens).',
+      'Matriz completa <strong>SWC-100 → SWC-136</strong> contra <code>StakingRewards</code>. Informe en <code>doc/SWC-AUDIT-ES.md</code>. Conclusión: <strong>0 vulnerabilidades explotables</strong>; 3 ítems informativos (approve, timestamp, trust owner/tokens).',
     'swc.s1': 'Mitigados / N/A',
     'swc.s2': 'Informativos (diseño)',
     'swc.s3': 'Vulnerables',
@@ -113,7 +113,7 @@ const I18N = {
     'term.label': 'rolando@strahm:~/03-staking',
     'term.1': 'forge test',
     'term.2': '[PASS] 35 tests · unit/fuzz/inv/attack',
-    'term.3': 'cat doc/SWC-AUDIT.md | head',
+    'term.3': 'cat doc/SWC-AUDIT-ES.md | head',
     'term.4': 'Vulnerable: 0 · Informativos: 3 · Mitigados/N/A: 33',
     'term.5': 'echo status',
     'term.6': 'MODULE_03_CLOSED · SWC_0_CRITICAL · GAS_DOCUMENTED',
@@ -198,7 +198,7 @@ const I18N = {
     'gas.eyebrow': '// 03 — GAS OPTIMIZATION',
     'gas.title': 'Cheaper hot paths',
     'gas.lead':
-      'Every optimization documents its <strong>tradeoff</strong> in <code>doc/GAS.md</code>. Baseline vs post-opt via <code>forge test --gas-report</code>. Deploy cost rises slightly (OZ 5.2 + getters); user/admin paths <strong>drop</strong>.',
+      'Every optimization documents its <strong>tradeoff</strong> in <code>doc/GAS-EN.md</code>. Baseline vs post-opt via <code>forge test --gas-report</code>. Deploy cost rises slightly (OZ 5.2 + getters); user/admin paths <strong>drop</strong>.',
     'gas.m1': 'notify avg',
     'gas.m2': 'withdraw avg',
     'gas.m3': 'exit avg',
@@ -221,7 +221,7 @@ const I18N = {
     'swc.eyebrow': '// 04 — SWC VERIFICATION',
     'swc.title': 'SWC Registry · EIP-1470',
     'swc.lead':
-      'Full matrix <strong>SWC-100 → SWC-136</strong> against <code>StakingRewards</code>. Report in <code>doc/SWC-AUDIT.md</code>. Conclusion: <strong>0 exploitable vulnerabilities</strong>; 3 informational items (approve, timestamp, owner/token trust).',
+      'Full matrix <strong>SWC-100 → SWC-136</strong> against <code>StakingRewards</code>. Report in <code>doc/SWC-AUDIT-EN.md</code>. Conclusion: <strong>0 exploitable vulnerabilities</strong>; 3 informational items (approve, timestamp, owner/token trust).',
     'swc.s1': 'Mitigated / N/A',
     'swc.s2': 'Informational (design)',
     'swc.s3': 'Vulnerable',
@@ -257,7 +257,7 @@ const I18N = {
     'term.label': 'rolando@strahm:~/03-staking',
     'term.1': 'forge test',
     'term.2': '[PASS] 35 tests · unit/fuzz/inv/attack',
-    'term.3': 'cat doc/SWC-AUDIT.md | head',
+    'term.3': 'cat doc/SWC-AUDIT-EN.md | head',
     'term.4': 'Vulnerable: 0 · Informational: 3 · Mitigated/N/A: 33',
     'term.5': 'echo status',
     'term.6': 'MODULE_03_CLOSED · SWC_0_CRITICAL · GAS_DOCUMENTED',
