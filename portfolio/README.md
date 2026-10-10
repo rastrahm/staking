@@ -16,7 +16,7 @@ O abrir `index.html` en el navegador.
 ## Contenido
 
 - Contexto + 3 pilares (staking O(1) / gas / SWC)
-- Métricas de gas (`notify`, `withdraw`, `exit`, `stake`) desde `doc/GAS.md`
+- Métricas de gas (`notify`, `withdraw`, `exit`, `stake`) desde `doc/GAS-ES.md`
 - Matriz SWC resumida + informativos (114 / 116)
 - Fases 0–7 + campañas A–E
 - Links GitHub / GitLab

@@ -5,7 +5,7 @@ UI Next.js (App Router) para el pool `StakingRewards`: conectar wallet, stake, c
 ## Prerrequisitos
 
 1. Node **≥ 20** (recomendado 22 via nvm).
-2. Anvil + deploy (ver [`DEPLOY.md`](./DEPLOY.md)).
+2. Anvil + deploy (ver [`DEPLOY-ES.md`](./DEPLOY-ES.md)).
 3. ABIs en `frontend/abi/` (`./script/export-abi.sh`).
 
 ## Setup

@@ -1,6 +1,6 @@
 # Diagrama de flujo — Staking & Reward Distribution
 
-Secuencias de interacción entre **usuario**, **wallet/frontend** y **StakingRewards** (código final v1). Complementa el [flujograma de decisiones](./03-flujograma.md). Handoff: [`HANDOFF.md`](./HANDOFF.md).
+Secuencias de interacción entre **usuario**, **wallet/frontend** y **StakingRewards** (código final v1). Complementa el [flujograma de decisiones](./03-flujograma-ES.md). Handoff: [`HANDOFF-ES.md`](./HANDOFF-ES.md).
 
 ---
 

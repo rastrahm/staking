@@ -70,7 +70,7 @@ Genera (en `doc/abi/` y `frontend/abi/`):
 
 ## 3. Frontend env (Fase 6)
 
-Ver playbook completo: [`FRONTEND.md`](./FRONTEND.md).
+Ver playbook completo: [`FRONTEND-ES.md`](./FRONTEND-ES.md).
 
 ```bash
 cd frontend

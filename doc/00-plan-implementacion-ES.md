@@ -2,7 +2,7 @@
 
 Documento maestro del módulo. Define fases, entregables, criterios de aceptación y el **protocolo de autorización** usado durante el desarrollo.
 
-> **Estado actual:** Fases **0–7** ✅ (2026-08-27). Ver [`HANDOFF.md`](./HANDOFF.md).
+> **Estado actual:** Fases **0–7** ✅ (2026-08-27). Ver [`HANDOFF-ES.md`](./HANDOFF-ES.md).
 
 ---
 
@@ -76,9 +76,9 @@ Usuario (MetaMask / cast)
 
 Diagramas:
 
-- [Diagrama de clases](./01-diagrama-clases.md)
-- [Diagrama de flujo](./02-diagrama-flujo.md)
-- [Flujograma](./03-flujograma.md)
+- [Diagrama de clases](./01-diagrama-clases-ES.md)
+- [Diagrama de flujo](./02-diagrama-flujo-ES.md)
+- [Flujograma](./03-flujograma-ES.md)
 
 ---
 
@@ -235,7 +235,7 @@ Congelar interfaz, errores, eventos y fórmulas; escribir tests que fallen / esq
 - [x] Interfaces compilables.
 - [x] Solo custom errors (sin `require` strings).
 - [x] Tests unitarios escritos para lifecycle Stake → warp → Claim → Unstake (rojos hasta Fase 2).
-- [x] Fórmulas escritas en NatSpec / `doc/04-modelo-matematico.md`.
+- [x] Fórmulas escritas en NatSpec / `doc/04-modelo-matematico-ES.md`.
 
 #### Resultado
 
@@ -244,7 +244,7 @@ Congelar interfaz, errores, eventos y fórmulas; escribir tests que fallen / esq
 - `src/mocks/MockERC20.sol` — mint para tests.
 - `test/StakingRewards.t.sol` — 7 tests verdes (constructor, views, NotImplemented).
 - `test/unit/StakingRewards.lifecycle.t.sol` — 2 tests **rojos** TDD (lifecycle + prorrateo 2 stakers).
-- `doc/04-modelo-matematico.md` — PRECISION `1e18`, invariante, decisiones v1.
+- `doc/04-modelo-matematico-ES.md` — PRECISION `1e18`, invariante, decisiones v1.
 - Decisiones: same token OK; sin Pausable; `exit()` sí; sin fee-on-transfer; notify con tokens ya en vault.
 
 #### Aprobación
@@ -362,7 +362,7 @@ Endurecer propiedades matemáticas y de seguridad.
 
 - [x] Fuzz ≥ 1000 runs sin rotura de invariante.
 - [x] Reentrancy no drena.
-- [x] Gas report baseline documentado (`doc/GAS.md`).
+- [x] Gas report baseline documentado (`doc/GAS-ES.md`).
 
 #### Resultado
 
@@ -370,7 +370,7 @@ Endurecer propiedades matemáticas y de seguridad.
 - `test/invariant/` — handler + `StakeTokenExact` + `RewardSolvency` (256 runs / 3840 calls).
 - `test/attack/ReentrancyAttack.t.sol` — callback ERC-20 en getReward/withdraw → `ReentrancyGuardReentrantCall`, sin drenado.
 - `src/mocks/MockERC20Reentrant.sol`.
-- `doc/GAS.md` — baseline deploy ~1.15M gas; tradeoffs documentados.
+- `doc/GAS-ES.md` — baseline deploy ~1.15M gas; tradeoffs documentados.
 - Suite total: **35 tests** verdes (unit + fuzz + invariant + attack).
 
 #### Aprobación
@@ -408,7 +408,7 @@ Deploy reproducible en Anvil/testnet y export de ABI para UI.
 
 - `script/Deploy.s.sol` — mocks opcionales, `SAME_TOKEN`, mint, `notify` inicial.
 - `script/export-abi.sh` → `doc/abi/` + `frontend/abi/` (`StakingRewards`, `IStakingRewards`, `MockERC20`).
-- `doc/DEPLOY.md` — playbook Anvil / testnet.
+- `doc/DEPLOY-ES.md` — playbook Anvil / testnet.
 - Verificado en Anvil chain 31337: deploy + `notify` OK; `cast call rewardRate/periodFinish`.
 
 #### Aprobación
@@ -440,7 +440,7 @@ Demo Next.js: conectar wallet, stake, claim, unstake, ver `earned`.
 
 #### Criterios de aceptación
 
-- [x] Flujo feliz documentado (`doc/FRONTEND.md`).
+- [x] Flujo feliz documentado (`doc/FRONTEND-ES.md`).
 - [x] `next build` OK.
 - [x] Tests UI mínimos verdes.
 
@@ -509,7 +509,7 @@ Alinear diagramas con código final; README usable por un tercero.
 6. [x] Lockup dinámico y periodos de reward con `RewardPeriodActive` donde corresponda.
 7. [x] Suite: unit + fuzz + invariant (+ ataque reentrancy).
 8. [x] Invariante de vault respetada.
-9. [x] Diagramas y plan actualizados al cerrar (`HANDOFF.md`, clases alineadas a Transient).
+9. [x] Diagramas y plan actualizados al cerrar (`HANDOFF-ES.md`, clases alineadas a Transient).
 10. [x] Frontend autorizado e implementado (Fase 6).
 
 ---
@@ -531,4 +531,4 @@ Alinear diagramas con código final; README usable por un tercero.
 
 **Estado actual:** Fases **0–7** cerradas. Módulo listo para handoff.
 
-Entrada recomendada para un tercero: [`HANDOFF.md`](./HANDOFF.md).
+Entrada recomendada para un tercero: [`HANDOFF-ES.md`](./HANDOFF-ES.md).

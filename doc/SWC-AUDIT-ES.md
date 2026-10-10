@@ -7,7 +7,7 @@ Verificación de `StakingRewards` contra el [SWC Registry](https://swcregistry.i
 **Contrato auditado:** `src/StakingRewards.sol` (+ `src/interfaces/IStakingRewards.sol`)  
 **Fecha:** 2026-08-26  
 **Referencia tests:** `test/StakingRewards.t.sol`, `test/unit/`, `test/fuzz/`, `test/invariant/`, `test/attack/`  
-**Modelo:** [`04-modelo-matematico.md`](./04-modelo-matematico.md)
+**Modelo:** [`04-modelo-matematico-ES.md`](./04-modelo-matematico-ES.md)
 
 ---
 
@@ -138,6 +138,6 @@ El pool no gestiona allowances. El usuario debe `approve(staking, amount)` en el
 ## Referencias
 
 - [SWC Registry](https://swcregistry.io/)
-- Campañas: [`ATAQUES.md`](./ATAQUES.md)
-- Modelo: [`04-modelo-matematico.md`](./04-modelo-matematico.md)
-- Gas: [`GAS.md`](./GAS.md)
+- Campañas: [`ATAQUES-ES.md`](./ATAQUES-ES.md)
+- Modelo: [`04-modelo-matematico-ES.md`](./04-modelo-matematico-ES.md)
+- Gas: [`GAS-ES.md`](./GAS-ES.md)
